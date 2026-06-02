@@ -13,6 +13,12 @@ public class ConversationBattleSystem : MonoBehaviour
         MuyBueno = 2
     }
 
+    public enum BattlePhase
+    {
+        Conversation,
+        Attack
+    }
+
     [Header("Player Choices")]
     public ConversationType player1Choice = ConversationType.None;
     public ConversationType player2Choice = ConversationType.None;
@@ -21,11 +27,13 @@ public class ConversationBattleSystem : MonoBehaviour
     public int player1Score;
     public int player2Score;
 
-    [Header("Round Settings")]
+    [Header("Conversation Time")]
     public int roundTime = 10;
-    public float nextRoundDelay = 3f;
 
-    [Header("UI References")]
+    [Header("Attack Time")]
+    public float attackTime = 10f;
+
+    [Header("UI")]
     public TMP_Text countdownText;
     public TMP_Text player1StatusText;
     public TMP_Text player2StatusText;
@@ -35,6 +43,11 @@ public class ConversationBattleSystem : MonoBehaviour
     public float countdownNormalScale = 1f;
     public float countdownBigScale = 1.35f;
     public float countdownAnimSpeed = 8f;
+
+    [Header("Attack System")]
+    public PlayerAttackInput attackSystem;
+
+    private BattlePhase currentPhase;
 
     private bool roundActive;
     private bool roundFinished;
@@ -47,12 +60,17 @@ public class ConversationBattleSystem : MonoBehaviour
 
     private void Update()
     {
-        if (!roundActive || roundFinished) return;
+        if (currentPhase != BattlePhase.Conversation)
+            return;
+
+        if (!roundActive || roundFinished)
+            return;
 
         ReadPlayer1Input();
         ReadPlayer2Input();
 
-        if (player1Choice != ConversationType.None && player2Choice != ConversationType.None)
+        if (player1Choice != ConversationType.None &&
+            player2Choice != ConversationType.None)
         {
             FinishRound();
         }
@@ -60,7 +78,8 @@ public class ConversationBattleSystem : MonoBehaviour
 
     private void ReadPlayer1Input()
     {
-        if (player1Choice != ConversationType.None) return;
+        if (player1Choice != ConversationType.None)
+            return;
 
         if (Keyboard.current.digit1Key.wasPressedThisFrame)
         {
@@ -78,7 +97,8 @@ public class ConversationBattleSystem : MonoBehaviour
 
     private void ReadPlayer2Input()
     {
-        if (player2Choice != ConversationType.None) return;
+        if (player2Choice != ConversationType.None)
+            return;
 
         if (Keyboard.current.digit7Key.wasPressedThisFrame)
         {
@@ -97,26 +117,27 @@ public class ConversationBattleSystem : MonoBehaviour
     private void LockPlayer1Choice(ConversationType choice)
     {
         player1Choice = choice;
-        player1StatusText.text = "Player 1 locked in its answer";
-        Debug.Log("Player 1 chose: " + choice);
+        player1StatusText.text = "Player 1 locked";
     }
 
     private void LockPlayer2Choice(ConversationType choice)
     {
         player2Choice = choice;
-        player2StatusText.text = "Player 2 locked in its answer";
-        Debug.Log("Player 2 chose: " + choice);
+        player2StatusText.text = "Player 2 locked";
     }
 
     private void StartNewRound()
     {
         StopAllCoroutines();
 
+        currentPhase = BattlePhase.Conversation;
+
         player1Choice = ConversationType.None;
         player2Choice = ConversationType.None;
 
         roundActive = true;
         roundFinished = false;
+
         currentTime = roundTime;
 
         player1StatusText.text = "";
@@ -154,8 +175,7 @@ public class ConversationBattleSystem : MonoBehaviour
             countdownText.transform.localScale = Vector3.Lerp(
                 countdownText.transform.localScale,
                 Vector3.one * countdownNormalScale,
-                Time.deltaTime * countdownAnimSpeed
-            );
+                Time.deltaTime * countdownAnimSpeed);
 
             yield return null;
         }
@@ -165,31 +185,85 @@ public class ConversationBattleSystem : MonoBehaviour
 
     private void FinishRound()
     {
-        if (roundFinished) return;
+        if (roundFinished)
+            return;
 
         roundFinished = true;
         roundActive = false;
 
         StopAllCoroutines();
 
-        countdownText.text = "0";
-
-        string player1Result = GetChoiceText(player1Choice);
-        string player2Result = GetChoiceText(player2Choice);
-
         string winnerText = GetWinnerText();
 
         resultText.text =
-            "Player 1 chose: " + player1Result + "\n" +
-            "Player 2 chose: " + player2Result + "\n\n" +
+            "P1: " + GetChoiceText(player1Choice) + "\n" +
+            "P2: " + GetChoiceText(player2Choice) + "\n\n" +
             winnerText;
 
-        Debug.Log("----- ROUND FINISHED -----");
-        Debug.Log("Player 1 chose: " + player1Result);
-        Debug.Log("Player 2 chose: " + player2Result);
-        Debug.Log(winnerText);
+        StartCoroutine(AttackPhaseRoutine());
+    }
 
-        StartCoroutine(NextRoundRoutine());
+    private IEnumerator AttackPhaseRoutine()
+    {
+        currentPhase = BattlePhase.Attack;
+
+        int winner = GetWinner();
+
+        if (winner == 1)
+        {
+            attackSystem.EnablePlayer1Attack();
+        }
+        else if (winner == 2)
+        {
+            attackSystem.EnablePlayer2Attack();
+        }
+        else
+        {
+            countdownText.text = "DRAW";
+
+            yield return new WaitForSeconds(2f);
+
+            StartNewRound();
+            yield break;
+        }
+
+        float timer = attackTime;
+
+        while (timer > 0f && !attackSystem.attackPerformed)
+        {
+            countdownText.text = "ATTACK " + Mathf.CeilToInt(timer);
+
+            timer -= Time.deltaTime;
+
+            yield return null;
+        }
+
+        attackSystem.DisableAttacks();
+
+        yield return new WaitForSeconds(1f);
+
+        StartNewRound();
+    }
+
+    private int GetWinner()
+    {
+        if (player1Choice == ConversationType.None &&
+            player2Choice == ConversationType.None)
+            return 0;
+
+        if (player1Choice == ConversationType.None)
+            return 2;
+
+        if (player2Choice == ConversationType.None)
+            return 1;
+
+        if (player1Choice > player2Choice)
+            return 1;
+
+        if (player2Choice > player1Choice)
+            return 2;
+
+        return 0;
     }
 
     private string GetChoiceText(ConversationType choice)
@@ -212,41 +286,20 @@ public class ConversationBattleSystem : MonoBehaviour
 
     private string GetWinnerText()
     {
-        if (player1Choice == ConversationType.None && player2Choice == ConversationType.None)
-        {
-            return "Nobody answered";
-        }
+        int winner = GetWinner();
 
-        if (player1Choice == ConversationType.None)
-        {
-            player2Score++;
-            return "Player 2 wins because Player 1 did not answer";
-        }
-
-        if (player2Choice == ConversationType.None)
+        if (winner == 1)
         {
             player1Score++;
-            return "Player 1 wins because Player 2 did not answer";
+            return "Player 1 Wins";
         }
 
-        if (player1Choice > player2Choice)
-        {
-            player1Score++;
-            return "Player 1 wins";
-        }
-
-        if (player2Choice > player1Choice)
+        if (winner == 2)
         {
             player2Score++;
-            return "Player 2 wins";
+            return "Player 2 Wins";
         }
 
         return "Draw";
-    }
-
-    private IEnumerator NextRoundRoutine()
-    {
-        yield return new WaitForSeconds(nextRoundDelay);
-        StartNewRound();
     }
 }
