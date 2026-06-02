@@ -54,6 +54,9 @@ public class ConversationBattleSystem : MonoBehaviour
     [Header("Attack System")]
     public PlayerAttackInput attackSystem;
 
+    [Header("Round Timer Modifier")]
+    public AttackTimeModifier attackTimeModifier;
+
     private BattlePhase currentPhase;
 
     private bool roundActive;
@@ -284,6 +287,18 @@ public class ConversationBattleSystem : MonoBehaviour
         }
 
         float timer = attackTime;
+
+        if (attackTimeModifier != null)
+        {
+            bool ready = false;
+
+            yield return StartCoroutine(
+                attackTimeModifier.PrepareAttack(t => {
+                    timer = t;
+                    ready = true;
+                })
+            );
+        }
 
         while (timer > 0f && !attackSystem.attackPerformed)
         {
