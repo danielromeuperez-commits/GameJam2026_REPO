@@ -1,6 +1,8 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
 
 public class PlayerAttackInput : MonoBehaviour
 {
@@ -12,10 +14,25 @@ public class PlayerAttackInput : MonoBehaviour
         public string name;
     }
 
+    [System.Serializable]
+    public class ComboVisualRow
+    {
+        public string rowName;
+        public ComboLetterUI[] letters;
+    }
+
+    [Header("Health")]
     public PlayerHealth player1Health;
     public PlayerHealth player2Health;
 
+    [Header("Combos")]
     public Combo[] combos;
+
+    [Header("Combo Visual Rows")]
+    public ComboVisualRow[] comboVisualRows;
+
+    [Header("UI")]
+    public TMP_Text attackInfoText;
 
     public bool attackPerformed;
 
@@ -24,99 +41,160 @@ public class PlayerAttackInput : MonoBehaviour
 
     private List<Key> inputBuffer = new List<Key>();
 
-    public float bufferTime = 1f;
-    private float lastInputTime;
+    private int activeRowIndex = -1;
+    private int lastExpectedLetterIndex = 0;
 
-    void Update()
+    private void Update()
     {
+        if (!player1CanAttack && !player2CanAttack) return;
+        if (attackPerformed) return;
+
         RegisterInput();
-
-        // limpiar buffer si pasa demasiado tiempo
-        if (Time.time - lastInputTime > bufferTime)
-        {
-            inputBuffer.Clear();
-        }
-
-        CheckCombos();
     }
 
-    void RegisterInput()
+    private void RegisterInput()
     {
-        var kb = Keyboard.current;
+        Keyboard kb = Keyboard.current;
         if (kb == null) return;
 
-        // INPUT CORRECTO (sin mapeos raros)
-        if (kb.aKey.wasPressedThisFrame) AddKey(Key.A);
-        if (kb.sKey.wasPressedThisFrame) AddKey(Key.S);
-        if (kb.dKey.wasPressedThisFrame) AddKey(Key.D);
-        if (kb.fKey.wasPressedThisFrame) AddKey(Key.F);
-        if (kb.gKey.wasPressedThisFrame) AddKey(Key.G);
-        if (kb.hKey.wasPressedThisFrame) AddKey(Key.H);
-        if (kb.jKey.wasPressedThisFrame) AddKey(Key.J);
-        if (kb.kKey.wasPressedThisFrame) AddKey(Key.K);
-    }
-
-    void AddKey(Key key)
-    {
-        inputBuffer.Add(key);
-        lastInputTime = Time.time;
-
-        Debug.Log("Input: " + key);
-        Debug.Log("Buffer: " + string.Join(",", inputBuffer));
-    }
-
-    void CheckCombos()
-    {
-        // prioridad a combos largos (más correctos en fighting games)
-        for (int i = combos.Length - 1; i >= 0; i--)
+        foreach (KeyControl keyControl in kb.allKeys)
         {
-            if (Match(combos[i].sequence))
+            if (keyControl.wasPressedThisFrame)
             {
-                ExecuteCombo(combos[i]);
-                inputBuffer.Clear();
+                AddKey(keyControl.keyCode);
                 return;
             }
         }
     }
 
-    void ExecuteCombo(Combo combo)
+    private void AddKey(Key key)
     {
-        if (player1CanAttack)
+        int previousRowIndex = activeRowIndex;
+        int previousExpectedIndex = inputBuffer.Count;
+
+        inputBuffer.Add(key);
+
+        Debug.Log("Input: " + key);
+        Debug.Log("Buffer: " + string.Join(",", inputBuffer));
+
+        CheckCombos(previousRowIndex, previousExpectedIndex);
+    }
+
+    private void CheckCombos(int previousRowIndex, int previousExpectedIndex)
+    {
+        int matchingComboIndex = -1;
+
+        for (int i = 0; i < combos.Length; i++)
         {
-            player2Health.TakeDamage(combo.damage);
-            FinishAttack("Player 1 used combo: " + combo.name + " DMG: " + combo.damage);
+            Combo combo = combos[i];
+
+            if (combo == null || combo.sequence == null || combo.sequence.Length == 0)
+                continue;
+
+            if (ComboStartsWithCurrentInput(combo.sequence))
+            {
+                matchingComboIndex = i;
+                break;
+            }
         }
-        else if (player2CanAttack)
+
+        if (matchingComboIndex == -1)
         {
-            player1Health.TakeDamage(combo.damage);
-            FinishAttack("Player 2 used combo: " + combo.name + " DMG: " + combo.damage);
+            WrongInput(previousRowIndex, previousExpectedIndex);
+            return;
         }
-        else
+
+        activeRowIndex = matchingComboIndex;
+        lastExpectedLetterIndex = inputBuffer.Count;
+
+        UpdateComboVisuals(activeRowIndex);
+
+        Combo activeCombo = combos[activeRowIndex];
+
+        int completedLetterIndex = inputBuffer.Count - 1;
+
+        if (IsValidVisualLetter(activeRowIndex, completedLetterIndex))
         {
-            Debug.Log("Combo detected but no player is active");
+            comboVisualRows[activeRowIndex].letters[completedLetterIndex].PlayCorrectPop();
+        }
+
+        if (inputBuffer.Count == activeCombo.sequence.Length)
+        {
+            ExecuteCombo(activeCombo);
         }
     }
 
-    bool Match(Key[] combo)
+    private bool ComboStartsWithCurrentInput(Key[] comboSequence)
     {
-        if (inputBuffer.Count < combo.Length) return false;
+        if (inputBuffer.Count > comboSequence.Length)
+            return false;
 
-        int start = inputBuffer.Count - combo.Length;
-
-        for (int i = 0; i < combo.Length; i++)
+        for (int i = 0; i < inputBuffer.Count; i++)
         {
-            if (inputBuffer[start + i] != combo[i])
+            if (inputBuffer[i] != comboSequence[i])
                 return false;
         }
 
         return true;
     }
 
-    void FinishAttack(string msg)
+    private void ExecuteCombo(Combo combo)
+    {
+        if (combo == null || attackPerformed)
+            return;
+
+        PlayCompletedComboAnimation(activeRowIndex);
+
+        if (player1CanAttack)
+        {
+            if (player2Health != null)
+                player2Health.TakeDamage(combo.damage);
+
+            FinishAttack("Player 1 used " + combo.name + " | Damage: " + combo.damage);
+        }
+        else if (player2CanAttack)
+        {
+            if (player1Health != null)
+                player1Health.TakeDamage(combo.damage);
+
+            FinishAttack("Player 2 used " + combo.name + " | Damage: " + combo.damage);
+        }
+    }
+
+    private void FinishAttack(string msg)
     {
         attackPerformed = true;
-        DisableAttacks();
+
+        player1CanAttack = false;
+        player2CanAttack = false;
+
+        inputBuffer.Clear();
+        activeRowIndex = -1;
+        lastExpectedLetterIndex = 0;
+
+        if (attackInfoText != null)
+            attackInfoText.text = msg;
+
         Debug.Log(msg);
+    }
+
+    private void WrongInput(int previousRowIndex, int previousExpectedIndex)
+    {
+        Debug.Log("Wrong combo input");
+
+        if (attackInfoText != null)
+            attackInfoText.text = "Wrong combo! Try again.";
+
+        if (IsValidVisualLetter(previousRowIndex, previousExpectedIndex))
+        {
+            comboVisualRows[previousRowIndex].letters[previousExpectedIndex].PlayWrongFeedback();
+        }
+
+        inputBuffer.Clear();
+        activeRowIndex = -1;
+        lastExpectedLetterIndex = 0;
+
+        Invoke(nameof(ResetAllComboVisuals), 0.3f);
     }
 
     public void EnablePlayer1Attack()
@@ -124,6 +202,15 @@ public class PlayerAttackInput : MonoBehaviour
         player1CanAttack = true;
         player2CanAttack = false;
         attackPerformed = false;
+
+        inputBuffer.Clear();
+        activeRowIndex = -1;
+        lastExpectedLetterIndex = 0;
+
+        ResetAllComboVisuals();
+
+        if (attackInfoText != null)
+            attackInfoText.text = "Player 1 attack phase";
 
         Debug.Log("Player 1 can attack");
     }
@@ -134,6 +221,15 @@ public class PlayerAttackInput : MonoBehaviour
         player1CanAttack = false;
         attackPerformed = false;
 
+        inputBuffer.Clear();
+        activeRowIndex = -1;
+        lastExpectedLetterIndex = 0;
+
+        ResetAllComboVisuals();
+
+        if (attackInfoText != null)
+            attackInfoText.text = "Player 2 attack phase";
+
         Debug.Log("Player 2 can attack");
     }
 
@@ -141,5 +237,96 @@ public class PlayerAttackInput : MonoBehaviour
     {
         player1CanAttack = false;
         player2CanAttack = false;
+
+        inputBuffer.Clear();
+        activeRowIndex = -1;
+        lastExpectedLetterIndex = 0;
+
+        ResetAllComboVisuals();
+    }
+
+    private void UpdateComboVisuals(int activeRow)
+    {
+        for (int row = 0; row < comboVisualRows.Length; row++)
+        {
+            ComboVisualRow visualRow = comboVisualRows[row];
+
+            if (visualRow == null || visualRow.letters == null)
+                continue;
+
+            for (int i = 0; i < visualRow.letters.Length; i++)
+            {
+                ComboLetterUI letter = visualRow.letters[i];
+
+                if (letter == null)
+                    continue;
+
+                if (row != activeRow)
+                {
+                    letter.SetNormal();
+                    continue;
+                }
+
+                if (i < inputBuffer.Count)
+                {
+                    letter.SetCompleted();
+                }
+                else if (i == inputBuffer.Count)
+                {
+                    letter.SetActive();
+                }
+                else
+                {
+                    letter.SetNormal();
+                }
+            }
+        }
+    }
+
+    private void PlayCompletedComboAnimation(int rowIndex)
+    {
+        if (comboVisualRows == null) return;
+        if (rowIndex < 0 || rowIndex >= comboVisualRows.Length) return;
+
+        ComboVisualRow row = comboVisualRows[rowIndex];
+
+        if (row == null || row.letters == null) return;
+
+        for (int i = 0; i < row.letters.Length; i++)
+        {
+            if (row.letters[i] != null)
+                row.letters[i].PlaySuccessBounce();
+        }
+    }
+    private void ResetAllComboVisuals()
+    {
+        if (comboVisualRows == null) return;
+
+        for (int row = 0; row < comboVisualRows.Length; row++)
+        {
+            ComboVisualRow visualRow = comboVisualRows[row];
+
+            if (visualRow == null || visualRow.letters == null)
+                continue;
+
+            for (int i = 0; i < visualRow.letters.Length; i++)
+            {
+                if (visualRow.letters[i] != null)
+                    visualRow.letters[i].SetNormal();
+            }
+        }
+    }
+
+    private bool IsValidVisualLetter(int rowIndex, int letterIndex)
+    {
+        if (comboVisualRows == null) return false;
+        if (rowIndex < 0 || rowIndex >= comboVisualRows.Length) return false;
+
+        ComboVisualRow row = comboVisualRows[rowIndex];
+
+        if (row == null || row.letters == null) return false;
+        if (letterIndex < 0 || letterIndex >= row.letters.Length) return false;
+
+        return row.letters[letterIndex] != null;
     }
 }
