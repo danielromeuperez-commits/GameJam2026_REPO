@@ -9,6 +9,9 @@ EditorBuildSettings:
     path: Assets/__GJRoot__/Scenes/MainMenu.unity
     guid: 290702338fad4f2488ab7cd7a8361067
   - enabled: 1
+    path: Assets/__GJRoot__/Scenes/Options.unity
+    guid: cedbcca2a99f4e340962fdf48f8f1bcf
+  - enabled: 1
     path: Assets/__GJRoot__/Scenes/LvLScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
   - enabled: 1
