@@ -1,67 +1,101 @@
 using UnityEngine;
 using TMPro;
-using System.Collections; // Necesario para la corrutina de retardo
+using System.Collections;
 
-public class ShuffleBotones : MonoBehaviour
+public class DialogueShuffle : MonoBehaviour
 {
+    [Header("Buttons")]
     public TextMeshProUGUI textScreen1;
     public TextMeshProUGUI textScreen2;
     public TextMeshProUGUI textScreen3;
 
-    [Header("Phrases Pool")]
-    public string[] phraseMeh;
-    public string[] phraseGood;
-    public string[] phraseVeryGood;
+    [Header("Question")]
+    public TextMeshProUGUI questionText;
 
-    /// <summary>
-    /// Recibe el nuevo orden del sistema de batalla y espera un microsegundo 
-    /// para dibujarlo, asegurando que el orden físico cambie por completo.
-    /// </summary>
-    public void ActualizarTextosBotones(ConversationBattleSystem.ConversationType[] elMapeoReal)
+    [Header("Conversation Sets")]
+    public ConversationSet[] conversationSets;
+
+    private ConversationSet currentSet;
+    private int lastSetIndex = -1;
+
+    /// Recibe el orden REAL generado por el sistema de batalla.
+    /// El shuffle sigue funcionando exactamente igual.
+    public void ActualizarTextosBotones(
+        ConversationBattleSystem.ConversationType[] elMapeoReal)
     {
-        if (elMapeoReal == null || elMapeoReal.Length < 3) return;
+        if (elMapeoReal == null || elMapeoReal.Length < 3)
+            return;
 
-        // Detenemos cualquier actualización previa y lanzamos la nueva con un mini-retraso seguro
         StopAllCoroutines();
         StartCoroutine(RetardoDibujoRonda(elMapeoReal));
     }
 
-    private IEnumerator RetardoDibujoRonda(ConversationBattleSystem.ConversationType[] elMapeoReal)
+    private IEnumerator RetardoDibujoRonda(
+        ConversationBattleSystem.ConversationType[] elMapeoReal)
     {
-        // Esperamos al final del frame actual para que la lógica de batalla se asiente
         yield return new WaitForEndOfFrame();
 
-        // Ahora sí asignamos de manera real y desordenada a cada pantalla
+        if (conversationSets == null || conversationSets.Length == 0)
+        {
+            Debug.LogWarning("No hay Conversation Sets configurados.");
+            yield break;
+        }
+
+        SeleccionarNuevoConjunto();
+
+        if (questionText != null)
+            questionText.text = currentSet.pregunta;
+
+        // MANTENEMOS EL SHUFFLE
         SetButtonText(textScreen1, elMapeoReal[0]);
         SetButtonText(textScreen2, elMapeoReal[1]);
         SetButtonText(textScreen3, elMapeoReal[2]);
     }
 
-    private void SetButtonText(TextMeshProUGUI textUI, ConversationBattleSystem.ConversationType type)
+    private void SeleccionarNuevoConjunto()
     {
-        if (textUI == null) return;
-
-        string[] sourceArray = GetArray(type);
-
-        if (sourceArray == null || sourceArray.Length == 0)
+        if (conversationSets.Length == 1)
         {
-            textUI.text = "EMPTY";
+            currentSet = conversationSets[0];
             return;
         }
 
-        // Elige una frase totalmente aleatoria del array correspondiente
-        int index = Random.Range(0, sourceArray.Length);
-        textUI.text = sourceArray[index];
+        int randomIndex;
+
+        do
+        {
+            randomIndex = Random.Range(0, conversationSets.Length);
+        }
+        while (randomIndex == lastSetIndex);
+
+        lastSetIndex = randomIndex;
+        currentSet = conversationSets[randomIndex];
     }
 
-    private string[] GetArray(ConversationBattleSystem.ConversationType type)
+    private void SetButtonText(
+        TextMeshProUGUI textUI,
+        ConversationBattleSystem.ConversationType type)
     {
-        return type switch
+        if (textUI == null || currentSet == null)
+            return;
+
+        switch (type)
         {
-            ConversationBattleSystem.ConversationType.Meh => phraseMeh,
-            ConversationBattleSystem.ConversationType.Bueno => phraseGood,
-            ConversationBattleSystem.ConversationType.MuyBueno => phraseVeryGood,
-            _ => null
-        };
+            case ConversationBattleSystem.ConversationType.Meh:
+                textUI.text = currentSet.fraseMeh;
+                break;
+
+            case ConversationBattleSystem.ConversationType.Bueno:
+                textUI.text = currentSet.fraseGood;
+                break;
+
+            case ConversationBattleSystem.ConversationType.MuyBueno:
+                textUI.text = currentSet.fraseVeryGood;
+                break;
+
+            default:
+                textUI.text = "ERROR";
+                break;
+        }
     }
 }

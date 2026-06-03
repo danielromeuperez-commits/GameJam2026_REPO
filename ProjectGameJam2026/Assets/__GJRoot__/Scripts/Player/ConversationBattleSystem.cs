@@ -50,8 +50,8 @@ public class ConversationBattleSystem : MonoBehaviour
     public string player2CounterAttackMessage = "¡¡ Player 2 está preparando un contraataque !!";
 
     [Header("Player UI Shufflers")]
-    public ShuffleBotones player1UIButtons;
-    public ShuffleBotones player2UIButtons;
+    public DialogueShuffle player1UIButtons;
+    public DialogueShuffle player2UIButtons;
 
     [Header("Countdown Animation")]
     public float countdownNormalScale = 1f;
@@ -73,6 +73,9 @@ public class ConversationBattleSystem : MonoBehaviour
     [Header("Round Timer Modifier")]
     public AttackTimeModifier attackTimeModifier;
 
+    [Header("Round Announcer")]
+    public AnnouncerRound roundAnnouncer;
+
     private BattlePhase currentPhase;
     private bool roundActive;
     private bool roundFinished;
@@ -84,6 +87,14 @@ public class ConversationBattleSystem : MonoBehaviour
     private void Start()
     {
         HideComboPanelInstant();
+        StartCoroutine(BeginRound());
+    }
+
+    private IEnumerator BeginRound()
+    {
+        if (roundAnnouncer != null)
+            yield return StartCoroutine(roundAnnouncer.ShowNextRound());
+
         StartNewRound();
     }
 
@@ -331,7 +342,7 @@ public class ConversationBattleSystem : MonoBehaviour
 
             yield return new WaitForSeconds(2f);
 
-            StartNewRound();
+            yield return StartCoroutine(BeginRound());
             yield break;
         }
 
@@ -402,7 +413,7 @@ public class ConversationBattleSystem : MonoBehaviour
 
         yield return StartCoroutine(CloseComboPanel());
 
-        StartNewRound();
+        yield return StartCoroutine(BeginRound());
     }
 
     // ---------------- COMBO PANEL ----------------
