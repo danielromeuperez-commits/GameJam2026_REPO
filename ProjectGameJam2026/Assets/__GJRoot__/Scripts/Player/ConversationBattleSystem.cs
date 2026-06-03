@@ -39,6 +39,10 @@ public class ConversationBattleSystem : MonoBehaviour
     public TMP_Text player2StatusText;
     public TMP_Text resultText;
 
+    [Header("Player UI Shufflers (Asignar en Inspector)")]
+    public ShuffleBotones player1UIButtons;
+    public ShuffleBotones player2UIButtons;
+
     [Header("Countdown Animation")]
     public float countdownNormalScale = 1f;
     public float countdownBigScale = 1.35f;
@@ -58,10 +62,12 @@ public class ConversationBattleSystem : MonoBehaviour
     public AttackTimeModifier attackTimeModifier;
 
     private BattlePhase currentPhase;
-
     private bool roundActive;
     private bool roundFinished;
     private int currentTime;
+
+    private ConversationType[] player1Mapping = new ConversationType[3];
+    private ConversationType[] player2Mapping = new ConversationType[3];
 
     private void Start()
     {
@@ -87,6 +93,8 @@ public class ConversationBattleSystem : MonoBehaviour
         }
     }
 
+    // ---------------- INPUT ----------------
+
     private void ReadPlayer1Input()
     {
         if (player1Choice != ConversationType.None)
@@ -96,17 +104,11 @@ public class ConversationBattleSystem : MonoBehaviour
         if (kb == null) return;
 
         if (kb.digit1Key.wasPressedThisFrame)
-        {
-            LockPlayer1Choice(ConversationType.Meh);
-        }
+            LockPlayer1Choice(player1Mapping[0]);
         else if (kb.digit2Key.wasPressedThisFrame)
-        {
-            LockPlayer1Choice(ConversationType.Bueno);
-        }
+            LockPlayer1Choice(player1Mapping[1]);
         else if (kb.digit3Key.wasPressedThisFrame)
-        {
-            LockPlayer1Choice(ConversationType.MuyBueno);
-        }
+            LockPlayer1Choice(player1Mapping[2]);
     }
 
     private void ReadPlayer2Input()
@@ -118,23 +120,18 @@ public class ConversationBattleSystem : MonoBehaviour
         if (kb == null) return;
 
         if (kb.digit7Key.wasPressedThisFrame || kb.numpad7Key.wasPressedThisFrame)
-        {
-            LockPlayer2Choice(ConversationType.Meh);
-        }
+            LockPlayer2Choice(player2Mapping[0]);
         else if (kb.digit8Key.wasPressedThisFrame || kb.numpad8Key.wasPressedThisFrame)
-        {
-            LockPlayer2Choice(ConversationType.Bueno);
-        }
+            LockPlayer2Choice(player2Mapping[1]);
         else if (kb.digit9Key.wasPressedThisFrame || kb.numpad9Key.wasPressedThisFrame)
-        {
-            LockPlayer2Choice(ConversationType.MuyBueno);
-        }
+            LockPlayer2Choice(player2Mapping[2]);
     }
+
+    // ---------------- LOCK CHOICE ----------------
 
     private void LockPlayer1Choice(ConversationType choice)
     {
         player1Choice = choice;
-
         if (player1StatusText != null)
             player1StatusText.text = "Player 1 locked in its answer";
 
@@ -144,12 +141,13 @@ public class ConversationBattleSystem : MonoBehaviour
     private void LockPlayer2Choice(ConversationType choice)
     {
         player2Choice = choice;
-
         if (player2StatusText != null)
             player2StatusText.text = "Player 2 locked in its answer";
 
         Debug.Log("Player 2 chose: " + choice);
     }
+
+    // ---------------- ROUND ----------------
 
     private void StartNewRound()
     {
@@ -165,25 +163,48 @@ public class ConversationBattleSystem : MonoBehaviour
 
         currentTime = roundTime;
 
+        // 1. Forzamos un barajado de la lógica completamente fresco
+        RandomizeMappings();
+
+        // 2. Le mandamos el array caótico e independiente a los botones
+        if (player1UIButtons != null) player1UIButtons.ActualizarTextosBotones(player1Mapping);
+        if (player2UIButtons != null) player2UIButtons.ActualizarTextosBotones(player2Mapping);
+
         if (attackSystem != null)
             attackSystem.DisableAttacks();
 
         HideComboPanelInstant();
 
-        if (player1StatusText != null)
-            player1StatusText.text = "";
-
-        if (player2StatusText != null)
-            player2StatusText.text = "";
-
-        if (resultText != null)
-            resultText.text = "";
-
-        if (countdownText != null)
-            countdownText.text = "";
+        if (player1StatusText != null) player1StatusText.text = "";
+        if (player2StatusText != null) player2StatusText.text = "";
+        if (resultText != null) resultText.text = "";
+        if (countdownText != null) countdownText.text = "";
 
         StartCoroutine(CountdownRoutine());
     }
+
+    private void RandomizeMappings()
+    {
+        // Forzamos la creación de instancias totalmente nuevas en cada llamada
+        ConversationType[] baseP1 = { ConversationType.Meh, ConversationType.Bueno, ConversationType.MuyBueno };
+        Shuffle(baseP1);
+        player1Mapping = baseP1;
+
+        ConversationType[] baseP2 = { ConversationType.Meh, ConversationType.Bueno, ConversationType.MuyBueno };
+        Shuffle(baseP2);
+        player2Mapping = baseP2;
+    }
+
+    private void Shuffle(ConversationType[] array)
+    {
+        for (int i = array.Length - 1; i > 0; i--)
+        {
+            int rand = Random.Range(0, i + 1);
+            (array[i], array[rand]) = (array[rand], array[i]);
+        }
+    }
+
+    // ---------------- TIMER ----------------
 
     private IEnumerator CountdownRoutine()
     {
@@ -193,16 +214,13 @@ public class ConversationBattleSystem : MonoBehaviour
                 countdownText.text = currentTime.ToString();
 
             yield return StartCoroutine(AnimateCountdownNumber());
-
             yield return new WaitForSeconds(1f);
 
             currentTime--;
         }
 
         if (!roundFinished)
-        {
             FinishRound();
-        }
     }
 
     private IEnumerator AnimateCountdownNumber()
@@ -224,10 +242,11 @@ public class ConversationBattleSystem : MonoBehaviour
         countdownText.transform.localScale = Vector3.one * countdownNormalScale;
     }
 
+    // ---------------- FINISH ROUND ----------------
+
     private void FinishRound()
     {
-        if (roundFinished)
-            return;
+        if (roundFinished) return;
 
         roundFinished = true;
         roundActive = false;
@@ -236,10 +255,8 @@ public class ConversationBattleSystem : MonoBehaviour
 
         int winner = GetWinner();
 
-        if (winner == 1)
-            player1Score++;
-        else if (winner == 2)
-            player2Score++;
+        if (winner == 1) player1Score++;
+        else if (winner == 2) player2Score++;
 
         if (resultText != null)
         {
@@ -252,6 +269,8 @@ public class ConversationBattleSystem : MonoBehaviour
         StartCoroutine(AttackPhaseRoutine(winner));
     }
 
+    // ---------------- ATTACK PHASE ----------------
+
     private IEnumerator AttackPhaseRoutine(int winner)
     {
         currentPhase = BattlePhase.Attack;
@@ -262,14 +281,12 @@ public class ConversationBattleSystem : MonoBehaviour
                 countdownText.text = "DRAW";
 
             yield return new WaitForSeconds(2f);
-
             StartNewRound();
             yield break;
         }
 
         if (attackSystem == null)
         {
-            Debug.LogWarning("Attack System is not assigned.");
             yield return new WaitForSeconds(2f);
             StartNewRound();
             yield break;
@@ -278,24 +295,18 @@ public class ConversationBattleSystem : MonoBehaviour
         yield return StartCoroutine(OpenComboPanel());
 
         if (winner == 1)
-        {
             attackSystem.EnablePlayer1Attack();
-        }
-        else if (winner == 2)
-        {
+        else
             attackSystem.EnablePlayer2Attack();
-        }
 
         float timer = attackTime;
 
         if (attackTimeModifier != null)
         {
-            bool ready = false;
-
             yield return StartCoroutine(
-                attackTimeModifier.PrepareAttack(t => {
+                attackTimeModifier.PrepareAttack(t =>
+                {
                     timer = t;
-                    ready = true;
                 })
             );
         }
@@ -306,28 +317,20 @@ public class ConversationBattleSystem : MonoBehaviour
                 countdownText.text = "ATTACK " + Mathf.CeilToInt(timer);
 
             timer -= Time.deltaTime;
-
             yield return null;
         }
 
-        bool comboWasPerformed = attackSystem.attackPerformed;
-
-        if (!comboWasPerformed)
-        {
-            attackSystem.DisableAttacks();
-        }
+        attackSystem.DisableAttacks();
 
         yield return new WaitForSeconds(1f);
 
-        if (comboWasPerformed)
-        {
-            attackSystem.DisableAttacks();
-        }
-
         yield return StartCoroutine(CloseComboPanel());
 
+        // Al terminar el ataque se reinicia el flujo completo desordenando todo otra vez
         StartNewRound();
     }
+
+    // ---------------- UI PANEL ----------------
 
     private IEnumerator OpenComboPanel()
     {
@@ -353,18 +356,10 @@ public class ConversationBattleSystem : MonoBehaviour
     {
         if (comboPanel == null) yield break;
 
-        while (Vector2.Distance(comboPanel.anchoredPosition, comboPanelExitLeftPosition) > 1f)
-        {
-            comboPanel.anchoredPosition = Vector2.Lerp(
-                comboPanel.anchoredPosition,
-                comboPanelExitLeftPosition,
-                Time.deltaTime * comboPanelMoveSpeed);
-
-            yield return null;
-        }
-
         comboPanel.anchoredPosition = comboPanelExitLeftPosition;
         comboPanel.gameObject.SetActive(false);
+
+        yield return null;
     }
 
     private void HideComboPanelInstant()
@@ -375,6 +370,8 @@ public class ConversationBattleSystem : MonoBehaviour
             comboPanel.gameObject.SetActive(false);
         }
     }
+
+    // ---------------- WIN LOGIC ----------------
 
     private int GetWinner()
     {
@@ -399,30 +396,19 @@ public class ConversationBattleSystem : MonoBehaviour
 
     private string GetChoiceText(ConversationType choice)
     {
-        switch (choice)
+        return choice switch
         {
-            case ConversationType.Meh:
-                return "Meh";
-
-            case ConversationType.Bueno:
-                return "Bueno";
-
-            case ConversationType.MuyBueno:
-                return "Muy Bueno";
-
-            default:
-                return "No Answer";
-        }
+            ConversationType.Meh => "Meh",
+            ConversationType.Bueno => "Bueno",
+            ConversationType.MuyBueno => "Muy Bueno",
+            _ => "No Answer"
+        };
     }
 
     private string GetWinnerText(int winner)
     {
-        if (winner == 1)
-            return "Player 1 Wins";
-
-        if (winner == 2)
-            return "Player 2 Wins";
-
+        if (winner == 1) return "Player 1 Wins";
+        if (winner == 2) return "Player 2 Wins";
         return "Draw";
     }
 }
