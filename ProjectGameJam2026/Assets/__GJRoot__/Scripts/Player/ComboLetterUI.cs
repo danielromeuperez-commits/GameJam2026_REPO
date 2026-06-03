@@ -17,20 +17,24 @@ public class ComboLetterUI : MonoBehaviour
     public float normalScale = 1f;
     public float activeScale = 1.2f;
     public float wrongScale = 1.35f;
-    public float successScale = 1.35f;
+    public float typedWaveScale = 1.28f;
+    public float successScale = 1.45f;
 
-    [Header("Movement")]
+    [Header("Active Movement")]
     public float moveAmount = 6f;
     public float moveSpeed = 8f;
+
+    [Header("Typed Letter Wave")]
+    public float typedWaveHeight = 10f;
+    public float typedWaveDuration = 0.28f;
 
     [Header("Wrong Animation")]
     public float wrongShakeAmount = 8f;
     public float wrongAnimationTime = 0.25f;
 
-    [Header("Success Animation")]
-    public float successJumpHeight = 12f;
-    public float successJumpSpeed = 3.5f;
-    public int successJumps = 3;
+    [Header("Success Wave")]
+    public float successJumpHeight = 16f;
+    public float successJumpDuration = 0.45f;
 
     private Vector3 startPosition;
     private bool isActive;
@@ -115,10 +119,10 @@ public class ComboLetterUI : MonoBehaviour
             letterText.color = wrongColor;
     }
 
-    public void PlayCorrectPop()
+    public void PlayTypedWave()
     {
         StopCurrentRoutine();
-        currentRoutine = StartCoroutine(CorrectPopRoutine());
+        currentRoutine = StartCoroutine(TypedWaveRoutine());
     }
 
     public void PlayWrongFeedback()
@@ -127,13 +131,13 @@ public class ComboLetterUI : MonoBehaviour
         currentRoutine = StartCoroutine(WrongRoutine());
     }
 
-    public void PlaySuccessBounce()
+    public void PlaySuccessWave(float delay)
     {
         StopCurrentRoutine();
-        currentRoutine = StartCoroutine(SuccessBounceRoutine());
+        currentRoutine = StartCoroutine(SuccessWaveRoutine(delay));
     }
 
-    private IEnumerator CorrectPopRoutine()
+    private IEnumerator TypedWaveRoutine()
     {
         isActive = false;
 
@@ -141,23 +145,28 @@ public class ComboLetterUI : MonoBehaviour
             letterText.color = completedColor;
 
         float timer = 0f;
-        float duration = 0.18f;
 
-        while (timer < duration)
+        while (timer < typedWaveDuration)
         {
             timer += Time.deltaTime;
+            float t = timer / typedWaveDuration;
 
-            float t = timer / duration;
-            float scale = Mathf.Lerp(activeScale, normalScale, t);
+            float wave = Mathf.Sin(t * Mathf.PI);
+            float y = wave * typedWaveHeight;
+            float scale = Mathf.Lerp(normalScale, typedWaveScale, wave);
 
+            transform.localPosition = startPosition + new Vector3(0f, y, 0f);
             transform.localScale = Vector3.one * scale;
-            transform.localPosition = startPosition;
 
             yield return null;
         }
 
-        transform.localScale = Vector3.one * normalScale;
         transform.localPosition = startPosition;
+        transform.localScale = Vector3.one * normalScale;
+
+        if (letterText != null)
+            letterText.color = completedColor;
+
         currentRoutine = null;
     }
 
@@ -188,33 +197,37 @@ public class ComboLetterUI : MonoBehaviour
         currentRoutine = null;
     }
 
-    private IEnumerator SuccessBounceRoutine()
+    private IEnumerator SuccessWaveRoutine(float delay)
     {
         isActive = false;
+
+        yield return new WaitForSeconds(delay);
 
         if (letterText != null)
             letterText.color = successColor;
 
-        for (int i = 0; i < successJumps; i++)
+        float timer = 0f;
+
+        while (timer < successJumpDuration)
         {
-            float timer = 0f;
+            timer += Time.deltaTime;
+            float t = timer / successJumpDuration;
 
-            while (timer < 1f)
-            {
-                timer += Time.deltaTime * successJumpSpeed;
+            float wave = Mathf.Sin(t * Mathf.PI);
+            float y = wave * successJumpHeight;
+            float scale = Mathf.Lerp(normalScale, successScale, wave);
 
-                float jump = Mathf.Sin(timer * Mathf.PI) * successJumpHeight;
-                float scaleBoost = Mathf.Sin(timer * Mathf.PI) * (successScale - normalScale);
+            transform.localPosition = startPosition + new Vector3(0f, y, 0f);
+            transform.localScale = Vector3.one * scale;
 
-                transform.localPosition = startPosition + new Vector3(0f, jump, 0f);
-                transform.localScale = Vector3.one * (normalScale + scaleBoost);
-
-                yield return null;
-            }
-
-            transform.localPosition = startPosition;
-            transform.localScale = Vector3.one * normalScale;
+            yield return null;
         }
+
+        transform.localPosition = startPosition;
+        transform.localScale = Vector3.one * normalScale;
+
+        if (letterText != null)
+            letterText.color = successColor;
 
         currentRoutine = null;
     }

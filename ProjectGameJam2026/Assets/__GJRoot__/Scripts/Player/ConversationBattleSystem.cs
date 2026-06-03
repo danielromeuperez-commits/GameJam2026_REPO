@@ -34,12 +34,22 @@ public class ConversationBattleSystem : MonoBehaviour
     public float attackTime = 10f;
 
     [Header("UI")]
-    public TMP_Text countdownText;
+    public TMP_Text conversationCountdownText;
+    public TMP_Text attackCountdownText;
     public TMP_Text player1StatusText;
     public TMP_Text player2StatusText;
     public TMP_Text resultText;
 
-    [Header("Player UI Shufflers (Asignar en Inspector)")]
+    [Header("Counter Attack Text")]
+    public TMP_Text counterAttackText;
+
+    [TextArea(2, 4)]
+    public string player1CounterAttackMessage = "¡¡ Player 1 está preparando un contraataque !!";
+
+    [TextArea(2, 4)]
+    public string player2CounterAttackMessage = "¡¡ Player 2 está preparando un contraataque !!";
+
+    [Header("Player UI Shufflers")]
     public ShuffleBotones player1UIButtons;
     public ShuffleBotones player2UIButtons;
 
@@ -50,9 +60,11 @@ public class ConversationBattleSystem : MonoBehaviour
 
     [Header("Combo Panel")]
     public RectTransform comboPanel;
+
     public Vector2 comboPanelHiddenRightPosition = new Vector2(2000f, 0f);
     public Vector2 comboPanelVisiblePosition = new Vector2(0f, 0f);
     public Vector2 comboPanelExitLeftPosition = new Vector2(-2000f, 0f);
+
     public float comboPanelMoveSpeed = 8f;
 
     [Header("Attack System")]
@@ -132,6 +144,7 @@ public class ConversationBattleSystem : MonoBehaviour
     private void LockPlayer1Choice(ConversationType choice)
     {
         player1Choice = choice;
+
         if (player1StatusText != null)
             player1StatusText.text = "Player 1 locked in its answer";
 
@@ -141,6 +154,7 @@ public class ConversationBattleSystem : MonoBehaviour
     private void LockPlayer2Choice(ConversationType choice)
     {
         player2Choice = choice;
+
         if (player2StatusText != null)
             player2StatusText.text = "Player 2 locked in its answer";
 
@@ -163,34 +177,59 @@ public class ConversationBattleSystem : MonoBehaviour
 
         currentTime = roundTime;
 
-        // 1. Forzamos un barajado de la lógica completamente fresco
         RandomizeMappings();
 
-        // 2. Le mandamos el array caótico e independiente a los botones
-        if (player1UIButtons != null) player1UIButtons.ActualizarTextosBotones(player1Mapping);
-        if (player2UIButtons != null) player2UIButtons.ActualizarTextosBotones(player2Mapping);
+        if (player1UIButtons != null)
+            player1UIButtons.ActualizarTextosBotones(player1Mapping);
+
+        if (player2UIButtons != null)
+            player2UIButtons.ActualizarTextosBotones(player2Mapping);
 
         if (attackSystem != null)
             attackSystem.DisableAttacks();
 
         HideComboPanelInstant();
 
-        if (player1StatusText != null) player1StatusText.text = "";
-        if (player2StatusText != null) player2StatusText.text = "";
-        if (resultText != null) resultText.text = "";
-        if (countdownText != null) countdownText.text = "";
+        if (player1StatusText != null)
+            player1StatusText.text = "";
+
+        if (player2StatusText != null)
+            player2StatusText.text = "";
+
+        if (resultText != null)
+            resultText.text = "";
+
+        if (conversationCountdownText != null)
+            conversationCountdownText.text = "";
+
+        if (attackCountdownText != null)
+            attackCountdownText.text = "";
+
+        if (counterAttackText != null)
+            counterAttackText.text = "";
 
         StartCoroutine(CountdownRoutine());
     }
 
     private void RandomizeMappings()
     {
-        // Forzamos la creación de instancias totalmente nuevas en cada llamada
-        ConversationType[] baseP1 = { ConversationType.Meh, ConversationType.Bueno, ConversationType.MuyBueno };
+        ConversationType[] baseP1 =
+        {
+            ConversationType.Meh,
+            ConversationType.Bueno,
+            ConversationType.MuyBueno
+        };
+
         Shuffle(baseP1);
         player1Mapping = baseP1;
 
-        ConversationType[] baseP2 = { ConversationType.Meh, ConversationType.Bueno, ConversationType.MuyBueno };
+        ConversationType[] baseP2 =
+        {
+            ConversationType.Meh,
+            ConversationType.Bueno,
+            ConversationType.MuyBueno
+        };
+
         Shuffle(baseP2);
         player2Mapping = baseP2;
     }
@@ -204,14 +243,12 @@ public class ConversationBattleSystem : MonoBehaviour
         }
     }
 
-    // ---------------- TIMER ----------------
-
     private IEnumerator CountdownRoutine()
     {
         while (currentTime > 0 && !roundFinished)
         {
-            if (countdownText != null)
-                countdownText.text = currentTime.ToString();
+            if (conversationCountdownText != null)
+                conversationCountdownText.text = currentTime.ToString();
 
             yield return StartCoroutine(AnimateCountdownNumber());
             yield return new WaitForSeconds(1f);
@@ -220,33 +257,41 @@ public class ConversationBattleSystem : MonoBehaviour
         }
 
         if (!roundFinished)
+        {
+            if (conversationCountdownText != null)
+                conversationCountdownText.text = "0";
+
+            yield return StartCoroutine(AnimateCountdownNumber());
+            yield return new WaitForSeconds(0.3f);
+
             FinishRound();
+        }
     }
 
     private IEnumerator AnimateCountdownNumber()
     {
-        if (countdownText == null) yield break;
+        if (conversationCountdownText == null)
+            yield break;
 
-        countdownText.transform.localScale = Vector3.one * countdownBigScale;
+        conversationCountdownText.transform.localScale = Vector3.one * countdownBigScale;
 
-        while (countdownText.transform.localScale.x > countdownNormalScale + 0.01f)
+        while (conversationCountdownText.transform.localScale.x > countdownNormalScale + 0.01f)
         {
-            countdownText.transform.localScale = Vector3.Lerp(
-                countdownText.transform.localScale,
+            conversationCountdownText.transform.localScale = Vector3.Lerp(
+                conversationCountdownText.transform.localScale,
                 Vector3.one * countdownNormalScale,
                 Time.deltaTime * countdownAnimSpeed);
 
             yield return null;
         }
 
-        countdownText.transform.localScale = Vector3.one * countdownNormalScale;
+        conversationCountdownText.transform.localScale = Vector3.one * countdownNormalScale;
     }
-
-    // ---------------- FINISH ROUND ----------------
 
     private void FinishRound()
     {
-        if (roundFinished) return;
+        if (roundFinished)
+            return;
 
         roundFinished = true;
         roundActive = false;
@@ -255,8 +300,13 @@ public class ConversationBattleSystem : MonoBehaviour
 
         int winner = GetWinner();
 
-        if (winner == 1) player1Score++;
-        else if (winner == 2) player2Score++;
+        if (winner == 1)
+            player1Score++;
+        else if (winner == 2)
+            player2Score++;
+
+        if (conversationCountdownText != null)
+            conversationCountdownText.text = "";
 
         if (resultText != null)
         {
@@ -269,7 +319,6 @@ public class ConversationBattleSystem : MonoBehaviour
         StartCoroutine(AttackPhaseRoutine(winner));
     }
 
-    // ---------------- ATTACK PHASE ----------------
 
     private IEnumerator AttackPhaseRoutine(int winner)
     {
@@ -277,27 +326,28 @@ public class ConversationBattleSystem : MonoBehaviour
 
         if (winner == 0)
         {
-            if (countdownText != null)
-                countdownText.text = "DRAW";
+            if (conversationCountdownText != null)
+                conversationCountdownText.text = "DRAW";
 
             yield return new WaitForSeconds(2f);
+
             StartNewRound();
             yield break;
         }
 
         if (attackSystem == null)
         {
+            Debug.LogWarning("Attack System is not assigned.");
+
             yield return new WaitForSeconds(2f);
+
             StartNewRound();
             yield break;
         }
 
-        yield return StartCoroutine(OpenComboPanel());
+        SetCounterAttackText(winner);
 
-        if (winner == 1)
-            attackSystem.EnablePlayer1Attack();
-        else
-            attackSystem.EnablePlayer2Attack();
+        attackSystem.PrepareAttackWords();
 
         float timer = attackTime;
 
@@ -311,30 +361,56 @@ public class ConversationBattleSystem : MonoBehaviour
             );
         }
 
+        if (attackCountdownText != null)
+            attackCountdownText.text = "ATTACK: " + Mathf.CeilToInt(timer);
+
+        yield return StartCoroutine(OpenComboPanel());
+
+        if (winner == 1)
+            attackSystem.EnablePlayer1Attack();
+        else if (winner == 2)
+            attackSystem.EnablePlayer2Attack();
+
         while (timer > 0f && !attackSystem.attackPerformed)
         {
-            if (countdownText != null)
-                countdownText.text = "ATTACK " + Mathf.CeilToInt(timer);
+            if (attackCountdownText != null)
+                attackCountdownText.text = "ATTACK: " + Mathf.CeilToInt(timer);
 
             timer -= Time.deltaTime;
             yield return null;
         }
 
-        attackSystem.DisableAttacks();
+        if (!attackSystem.attackPerformed && attackCountdownText != null)
+        {
+            attackCountdownText.text = "ATTACK: 0";
+            yield return new WaitForSeconds(0.3f);
+        }
+
+        bool attackWasPerformed = attackSystem.attackPerformed;
+
+        if (!attackWasPerformed)
+        {
+            attackSystem.DisableAttacks();
+        }
 
         yield return new WaitForSeconds(1f);
 
+        if (attackWasPerformed)
+        {
+            attackSystem.DisableAttacks();
+        }
+
         yield return StartCoroutine(CloseComboPanel());
 
-        // Al terminar el ataque se reinicia el flujo completo desordenando todo otra vez
         StartNewRound();
     }
 
-    // ---------------- UI PANEL ----------------
+    // ---------------- COMBO PANEL ----------------
 
     private IEnumerator OpenComboPanel()
     {
-        if (comboPanel == null) yield break;
+        if (comboPanel == null)
+            yield break;
 
         comboPanel.gameObject.SetActive(true);
         comboPanel.anchoredPosition = comboPanelHiddenRightPosition;
@@ -354,20 +430,50 @@ public class ConversationBattleSystem : MonoBehaviour
 
     private IEnumerator CloseComboPanel()
     {
-        if (comboPanel == null) yield break;
+        if (comboPanel == null)
+            yield break;
+
+        while (Vector2.Distance(comboPanel.anchoredPosition, comboPanelExitLeftPosition) > 1f)
+        {
+            comboPanel.anchoredPosition = Vector2.Lerp(
+                comboPanel.anchoredPosition,
+                comboPanelExitLeftPosition,
+                Time.deltaTime * comboPanelMoveSpeed);
+
+            yield return null;
+        }
 
         comboPanel.anchoredPosition = comboPanelExitLeftPosition;
         comboPanel.gameObject.SetActive(false);
-
-        yield return null;
     }
 
     private void HideComboPanelInstant()
     {
         if (comboPanel != null)
         {
-            comboPanel.anchoredPosition = comboPanelExitLeftPosition;
+            comboPanel.anchoredPosition = comboPanelHiddenRightPosition;
             comboPanel.gameObject.SetActive(false);
+        }
+    }
+
+    // ---------------- COUNTER ATTACK TEXT ----------------
+
+    private void SetCounterAttackText(int winner)
+    {
+        if (counterAttackText == null)
+            return;
+
+        if (winner == 1)
+        {
+            counterAttackText.text = player1CounterAttackMessage;
+        }
+        else if (winner == 2)
+        {
+            counterAttackText.text = player2CounterAttackMessage;
+        }
+        else
+        {
+            counterAttackText.text = "";
         }
     }
 
@@ -407,8 +513,12 @@ public class ConversationBattleSystem : MonoBehaviour
 
     private string GetWinnerText(int winner)
     {
-        if (winner == 1) return "Player 1 Wins";
-        if (winner == 2) return "Player 2 Wins";
+        if (winner == 1)
+            return "Player 1 Wins";
+
+        if (winner == 2)
+            return "Player 2 Wins";
+
         return "Draw";
     }
 }

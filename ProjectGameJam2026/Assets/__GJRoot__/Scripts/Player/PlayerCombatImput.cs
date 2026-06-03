@@ -135,7 +135,47 @@ public class PlayerAttackInput : MonoBehaviour
 
     private void CheckWords(int previousRowIndex, int previousExpectedIndex)
     {
-        int matchingWordIndex = -1;
+        List<int> matchingRows = GetMatchingRowsWithCurrentInput();
+
+        if (matchingRows.Count == 0)
+        {
+            WrongInput();
+            return;
+        }
+
+        activeRowIndex = matchingRows[0];
+
+        UpdateWordVisuals(matchingRows);
+
+        int completedLetterIndex = inputBuffer.Count - 1;
+
+        for (int i = 0; i < matchingRows.Count; i++)
+        {
+            int rowIndex = matchingRows[i];
+
+            if (IsValidVisualLetter(rowIndex, completedLetterIndex))
+            {
+                GetRowByIndex(rowIndex).letters[completedLetterIndex].PlayTypedWave();
+            }
+        }
+
+        for (int i = 0; i < matchingRows.Count; i++)
+        {
+            int rowIndex = matchingRows[i];
+            ActiveWord selectedWord = activeWords[rowIndex];
+
+            if (selectedWord != null && inputBuffer.Count == selectedWord.sequence.Length)
+            {
+                activeRowIndex = rowIndex;
+                ExecuteWord(selectedWord);
+                return;
+            }
+        }
+    }
+
+    private List<int> GetMatchingRowsWithCurrentInput()
+    {
+        List<int> matchingRows = new List<int>();
 
         for (int i = 0; i < activeWords.Length; i++)
         {
@@ -146,34 +186,11 @@ public class PlayerAttackInput : MonoBehaviour
 
             if (WordStartsWithCurrentInput(activeWord.sequence))
             {
-                matchingWordIndex = i;
-                break;
+                matchingRows.Add(i);
             }
         }
 
-        if (matchingWordIndex == -1)
-        {
-            WrongInput(previousRowIndex, previousExpectedIndex);
-            return;
-        }
-
-        activeRowIndex = matchingWordIndex;
-
-        UpdateWordVisuals(activeRowIndex);
-
-        int completedLetterIndex = inputBuffer.Count - 1;
-
-        if (IsValidVisualLetter(activeRowIndex, completedLetterIndex))
-        {
-            GetRowByIndex(activeRowIndex).letters[completedLetterIndex].PlayCorrectPop();
-        }
-
-        ActiveWord selectedWord = activeWords[activeRowIndex];
-
-        if (inputBuffer.Count == selectedWord.sequence.Length)
-        {
-            ExecuteWord(selectedWord);
-        }
+        return matchingRows;
     }
 
     private bool WordStartsWithCurrentInput(Key[] wordSequence)
@@ -229,22 +246,61 @@ public class PlayerAttackInput : MonoBehaviour
         Debug.Log(msg);
     }
 
-    private void WrongInput(int previousRowIndex, int previousExpectedIndex)
+    private void WrongInput()
     {
         Debug.Log("Wrong word input");
 
         if (attackInfoText != null)
             attackInfoText.text = "Wrong word! Try again.";
 
-        if (previousRowIndex >= 0)
+        List<int> previousMatchingRows = GetRowsMatchingPreviousInput();
+
+        for (int i = 0; i < previousMatchingRows.Count; i++)
         {
-            PlayWrongWordFeedback(previousRowIndex);
+            PlayWrongWordFeedback(previousMatchingRows[i]);
         }
 
         inputBuffer.Clear();
         activeRowIndex = -1;
 
         Invoke(nameof(ResetAllWordVisuals), 0.35f);
+    }
+
+    private List<int> GetRowsMatchingPreviousInput()
+    {
+        List<int>  matchingRows = new List<int>();
+
+        if (inputBuffer.Count <= 1)
+        {
+            for (int i = 0; i < activeWords.Length; i++)
+            {
+                if (activeWords[i] != null)
+                    matchingRows.Add(i);
+            }
+
+            return matchingRows;
+        }
+
+        int lastIndex = inputBuffer.Count - 1;
+        Key wrongKey = inputBuffer[lastIndex];
+        inputBuffer.RemoveAt(lastIndex);
+
+        for (int i = 0; i < activeWords.Length; i++)
+        {
+            ActiveWord activeWord = activeWords[i];
+
+            if (activeWord == null || activeWord.sequence == null || activeWord.sequence.Length == 0)
+                continue;
+
+            if (WordStartsWithCurrentInput(activeWord.sequence))
+            {
+                matchingRows.Add(i);
+            }
+        }
+
+        inputBuffer.Add(wrongKey);
+
+        return matchingRows;
     }
 
     public void EnablePlayer1Attack()
@@ -256,16 +312,18 @@ public class PlayerAttackInput : MonoBehaviour
         inputBuffer.Clear();
         activeRowIndex = -1;
 
-        GenerateRandomWords();
-        SetupWordVisuals();
-        ResetAllWordVisuals();
+        if (activeWords[0] == null || activeWords[1] == null || activeWords[2] == null)
+        {
+            PrepareAttackWords();
+        }
+
         SetFirstLettersActive();
 
         if (attackInfoText != null)
             attackInfoText.text = "Player 1 attack phase";
 
         Debug.Log("Player 1 can attack");
-    }
+       }
 
     public void EnablePlayer2Attack()
     {
@@ -276,17 +334,30 @@ public class PlayerAttackInput : MonoBehaviour
         inputBuffer.Clear();
         activeRowIndex = -1;
 
-        GenerateRandomWords();
-        SetupWordVisuals();
-        ResetAllWordVisuals();
+        if (activeWords[0] == null || activeWords[1] == null || activeWords[2] == null)
+        {
+            PrepareAttackWords();
+        }
+
         SetFirstLettersActive();
 
         if (attackInfoText != null)
-            attackInfoText.text = "Player 2 attack phase";
+            attackInfoText.text = "player 2 attack phase";
 
         Debug.Log("Player 2 can attack");
     }
 
+    public void PrepareAttackWords()
+    {
+        inputBuffer.Clear();
+        activeRowIndex = -1;
+        attackPerformed = false;
+
+        GenerateRandomWords();
+        SetupWordVisuals();
+        ResetAllWordVisuals();
+        SetFirstLettersActive();
+    }
     public void DisableAttacks()
     {
         player1CanAttack = false;
@@ -432,7 +503,7 @@ public class PlayerAttackInput : MonoBehaviour
         }
     }
 
-    private void UpdateWordVisuals(int activeRow)
+    private void UpdateWordVisuals(List<int> activeRows)
     {
         for (int rowIndex = 0; rowIndex < activeWords.Length; rowIndex++)
         {
@@ -441,6 +512,8 @@ public class PlayerAttackInput : MonoBehaviour
             if (row == null || row.letters == null)
                 continue;
 
+            bool rowIsActive = activeRows.Contains(rowIndex);
+
             for (int i = 0; i < row.letters.Length; i++)
             {
                 ComboLetterUI letter = row.letters[i];
@@ -448,7 +521,7 @@ public class PlayerAttackInput : MonoBehaviour
                 if (letter == null || !letter.gameObject.activeSelf)
                     continue;
 
-                if (rowIndex != activeRow)
+                if (!rowIsActive)
                 {
                     letter.SetNormal();
                     continue;
@@ -516,12 +589,24 @@ public class PlayerAttackInput : MonoBehaviour
         if (row == null || row.letters == null)
             return;
 
+        int visibleCount = 0;
+
         for (int i = 0; i < row.letters.Length; i++)
         {
-            if (row.letters[i] == null || !row.letters[i].gameObject.activeSelf)
+            if (row.letters[i] != null && row.letters[i].gameObject.activeSelf)
+                visibleCount++;
+        }
+
+        for (int i = 0; i < visibleCount; i++)
+        {
+            if (row.letters[i] == null)
                 continue;
 
-            row.letters[i].PlaySuccessBounce();
+            int distanceFromEdge = Mathf.Min(i, visibleCount - 1 - i);
+            float delay = distanceFromEdge * 0.08f;
+
+            row.letters[i].PlaySuccessWave(delay);
+
         }
     }
 
