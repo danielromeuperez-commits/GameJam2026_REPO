@@ -53,6 +53,21 @@ public class ComboLetterUI : MonoBehaviour
         transform.localPosition = startPosition + new Vector3(0f, offset, 0f);
     }
 
+    public void SetLetter(string value)
+    {
+        gameObject.SetActive(true);
+
+        if (letterText != null)
+            letterText.text = value;
+
+        SetNormal();
+    }
+
+    public void HideLetter()
+    {
+        gameObject.SetActive(false);
+    }
+
     public void SetNormal()
     {
         StopCurrentRoutine();
@@ -86,6 +101,18 @@ public class ComboLetterUI : MonoBehaviour
 
         if (letterText != null)
             letterText.color = completedColor;
+    }
+
+    public void SetWrong()
+    {
+        StopCurrentRoutine();
+
+        isActive = false;
+        transform.localPosition = startPosition;
+        transform.localScale = Vector3.one * normalScale;
+
+        if (letterText != null)
+            letterText.color = wrongColor;
     }
 
     public void PlayCorrectPop()
@@ -157,9 +184,6 @@ public class ComboLetterUI : MonoBehaviour
 
         transform.localPosition = startPosition;
         transform.localScale = Vector3.one * normalScale;
-
-        if (letterText != null)
-            letterText.color = normalColor;
 
         currentRoutine = null;
     }

@@ -7,29 +7,81 @@ using UnityEngine.InputSystem.Controls;
 public class PlayerAttackInput : MonoBehaviour
 {
     [System.Serializable]
-    public class Combo
+    public class WordDifficulty
     {
-        public Key[] sequence;
+        public string difficultyName;
         public int damage;
-        public string name;
+
+        [TextArea(2, 5)]
+        public string[] words;
     }
 
     [System.Serializable]
-    public class ComboVisualRow
+    public class WordVisualRow
     {
         public string rowName;
         public ComboLetterUI[] letters;
+    }
+
+    private class ActiveWord
+    {
+        public string word;
+        public Key[] sequence;
+        public int damage;
+        public string difficultyName;
     }
 
     [Header("Health")]
     public PlayerHealth player1Health;
     public PlayerHealth player2Health;
 
-    [Header("Combos")]
-    public Combo[] combos;
+    [Header("Word Libraries")]
+    public WordDifficulty easyWords = new WordDifficulty
+    {
+        difficultyName = "Easy",
+        damage = 20,
+        words = new string[]
+        {
+            "RIMA",
+            "LUNA",
+            "SOL",
+            "MAR",
+            "FLOR"
+        }
+    };
 
-    [Header("Combo Visual Rows")]
-    public ComboVisualRow[] comboVisualRows;
+    public WordDifficulty mediumWords = new WordDifficulty
+    {
+        difficultyName = "Medium",
+        damage = 40,
+        words = new string[]
+        {
+            "DESTINO",
+            "CAMINO",
+            "POEMA",
+            "SILENCIO",
+            "ESTRELLA"
+        }
+    };
+
+    public WordDifficulty hardWords = new WordDifficulty
+    {
+        difficultyName = "Hard",
+        damage = 70,
+        words = new string[]
+        {
+            "INSPIRACION",
+            "MELANCOLIA",
+            "CONSTELACION",
+            "ESPERANZA",
+            "ESTERNOCLEIDOMASTOIDEO"
+        }
+    };
+
+    [Header("Visual Rows")]
+    public WordVisualRow easyRow;
+    public WordVisualRow mediumRow;
+    public WordVisualRow hardRow;
 
     [Header("UI")]
     public TMP_Text attackInfoText;
@@ -41,8 +93,9 @@ public class PlayerAttackInput : MonoBehaviour
 
     private List<Key> inputBuffer = new List<Key>();
 
+    private ActiveWord[] activeWords = new ActiveWord[3];
+
     private int activeRowIndex = -1;
-    private int lastExpectedLetterIndex = 0;
 
     private void Update()
     {
@@ -77,87 +130,86 @@ public class PlayerAttackInput : MonoBehaviour
         Debug.Log("Input: " + key);
         Debug.Log("Buffer: " + string.Join(",", inputBuffer));
 
-        CheckCombos(previousRowIndex, previousExpectedIndex);
+        CheckWords(previousRowIndex, previousExpectedIndex);
     }
 
-    private void CheckCombos(int previousRowIndex, int previousExpectedIndex)
+    private void CheckWords(int previousRowIndex, int previousExpectedIndex)
     {
-        int matchingComboIndex = -1;
+        int matchingWordIndex = -1;
 
-        for (int i = 0; i < combos.Length; i++)
+        for (int i = 0; i < activeWords.Length; i++)
         {
-            Combo combo = combos[i];
+            ActiveWord activeWord = activeWords[i];
 
-            if (combo == null || combo.sequence == null || combo.sequence.Length == 0)
+            if (activeWord == null || activeWord.sequence == null || activeWord.sequence.Length == 0)
                 continue;
 
-            if (ComboStartsWithCurrentInput(combo.sequence))
+            if (WordStartsWithCurrentInput(activeWord.sequence))
             {
-                matchingComboIndex = i;
+                matchingWordIndex = i;
                 break;
             }
         }
 
-        if (matchingComboIndex == -1)
+        if (matchingWordIndex == -1)
         {
             WrongInput(previousRowIndex, previousExpectedIndex);
             return;
         }
 
-        activeRowIndex = matchingComboIndex;
-        lastExpectedLetterIndex = inputBuffer.Count;
+        activeRowIndex = matchingWordIndex;
 
-        UpdateComboVisuals(activeRowIndex);
-
-        Combo activeCombo = combos[activeRowIndex];
+        UpdateWordVisuals(activeRowIndex);
 
         int completedLetterIndex = inputBuffer.Count - 1;
 
         if (IsValidVisualLetter(activeRowIndex, completedLetterIndex))
         {
-            comboVisualRows[activeRowIndex].letters[completedLetterIndex].PlayCorrectPop();
+            GetRowByIndex(activeRowIndex).letters[completedLetterIndex].PlayCorrectPop();
         }
 
-        if (inputBuffer.Count == activeCombo.sequence.Length)
+        ActiveWord selectedWord = activeWords[activeRowIndex];
+
+        if (inputBuffer.Count == selectedWord.sequence.Length)
         {
-            ExecuteCombo(activeCombo);
+            ExecuteWord(selectedWord);
         }
     }
 
-    private bool ComboStartsWithCurrentInput(Key[] comboSequence)
+    private bool WordStartsWithCurrentInput(Key[] wordSequence)
     {
-        if (inputBuffer.Count > comboSequence.Length)
+        if (inputBuffer.Count > wordSequence.Length)
             return false;
 
         for (int i = 0; i < inputBuffer.Count; i++)
         {
-            if (inputBuffer[i] != comboSequence[i])
+            if (inputBuffer[i] != wordSequence[i])
                 return false;
         }
 
         return true;
     }
 
-    private void ExecuteCombo(Combo combo)
+    private void ExecuteWord(ActiveWord word)
     {
-        if (combo == null || attackPerformed)
+        if (word == null || attackPerformed)
             return;
 
-        PlayCompletedComboAnimation(activeRowIndex);
+        PlayCompletedWordAnimation(activeRowIndex);
 
         if (player1CanAttack)
         {
             if (player2Health != null)
-                player2Health.TakeDamage(combo.damage);
+                player2Health.TakeDamage(word.damage);
 
-            FinishAttack("Player 1 used " + combo.name + " | Damage: " + combo.damage);
+            FinishAttack("Player 1 used " + word.word + " | Damage: " + word.damage);
         }
         else if (player2CanAttack)
         {
             if (player1Health != null)
-                player1Health.TakeDamage(combo.damage);
+                player1Health.TakeDamage(word.damage);
 
-            FinishAttack("Player 2 used " + combo.name + " | Damage: " + combo.damage);
+            FinishAttack("Player 2 used " + word.word + " | Damage: " + word.damage);
         }
     }
 
@@ -170,7 +222,6 @@ public class PlayerAttackInput : MonoBehaviour
 
         inputBuffer.Clear();
         activeRowIndex = -1;
-        lastExpectedLetterIndex = 0;
 
         if (attackInfoText != null)
             attackInfoText.text = msg;
@@ -180,21 +231,20 @@ public class PlayerAttackInput : MonoBehaviour
 
     private void WrongInput(int previousRowIndex, int previousExpectedIndex)
     {
-        Debug.Log("Wrong combo input");
+        Debug.Log("Wrong word input");
 
         if (attackInfoText != null)
-            attackInfoText.text = "Wrong combo! Try again.";
+            attackInfoText.text = "Wrong word! Try again.";
 
-        if (IsValidVisualLetter(previousRowIndex, previousExpectedIndex))
+        if (previousRowIndex >= 0)
         {
-            comboVisualRows[previousRowIndex].letters[previousExpectedIndex].PlayWrongFeedback();
+            PlayWrongWordFeedback(previousRowIndex);
         }
 
         inputBuffer.Clear();
         activeRowIndex = -1;
-        lastExpectedLetterIndex = 0;
 
-        Invoke(nameof(ResetAllComboVisuals), 0.3f);
+        Invoke(nameof(ResetAllWordVisuals), 0.35f);
     }
 
     public void EnablePlayer1Attack()
@@ -205,9 +255,11 @@ public class PlayerAttackInput : MonoBehaviour
 
         inputBuffer.Clear();
         activeRowIndex = -1;
-        lastExpectedLetterIndex = 0;
 
-        ResetAllComboVisuals();
+        GenerateRandomWords();
+        SetupWordVisuals();
+        ResetAllWordVisuals();
+        SetFirstLettersActive();
 
         if (attackInfoText != null)
             attackInfoText.text = "Player 1 attack phase";
@@ -223,9 +275,11 @@ public class PlayerAttackInput : MonoBehaviour
 
         inputBuffer.Clear();
         activeRowIndex = -1;
-        lastExpectedLetterIndex = 0;
 
-        ResetAllComboVisuals();
+        GenerateRandomWords();
+        SetupWordVisuals();
+        ResetAllWordVisuals();
+        SetFirstLettersActive();
 
         if (attackInfoText != null)
             attackInfoText.text = "Player 2 attack phase";
@@ -240,28 +294,161 @@ public class PlayerAttackInput : MonoBehaviour
 
         inputBuffer.Clear();
         activeRowIndex = -1;
-        lastExpectedLetterIndex = 0;
 
-        ResetAllComboVisuals();
+        ResetAllWordVisuals();
     }
 
-    private void UpdateComboVisuals(int activeRow)
+    private void GenerateRandomWords()
     {
-        for (int row = 0; row < comboVisualRows.Length; row++)
-        {
-            ComboVisualRow visualRow = comboVisualRows[row];
+        activeWords[0] = CreateActiveWordFromLibrary(easyWords);
+        activeWords[1] = CreateActiveWordFromLibrary(mediumWords);
+        activeWords[2] = CreateActiveWordFromLibrary(hardWords);
+    }
 
-            if (visualRow == null || visualRow.letters == null)
+    private ActiveWord CreateActiveWordFromLibrary(WordDifficulty library)
+    {
+        if (library == null || library.words == null || library.words.Length == 0)
+        {
+            Debug.LogWarning("Word library is empty.");
+            return null;
+        }
+
+        string randomWord = library.words[Random.Range(0, library.words.Length)];
+        string cleanedWord = CleanWord(randomWord);
+
+        Key[] sequence = ConvertWordToKeys(cleanedWord);
+
+        return new ActiveWord
+        {
+            word = cleanedWord,
+            sequence = sequence,
+            damage = library.damage,
+            difficultyName = library.difficultyName
+        };
+    }
+
+    private string CleanWord(string word)
+    {
+        if (string.IsNullOrWhiteSpace(word))
+            return "";
+
+        string cleaned = word.ToUpper();
+        cleaned = cleaned.Replace("Á", "A");
+        cleaned = cleaned.Replace("É", "E");
+        cleaned = cleaned.Replace("Í", "I");
+        cleaned = cleaned.Replace("Ó", "O");
+        cleaned = cleaned.Replace("Ú", "U");
+        cleaned = cleaned.Replace("Ü", "U");
+        cleaned = cleaned.Replace("Ñ", "N");
+        cleaned = cleaned.Replace(" ", "");
+
+        return cleaned;
+    }
+
+    private Key[] ConvertWordToKeys(string word)
+    {
+        List<Key> keys = new List<Key>();
+
+        for (int i = 0; i < word.Length; i++)
+        {
+            Key key = CharToKey(word[i]);
+
+            if (key != Key.None)
+                keys.Add(key);
+        }
+
+        return keys.ToArray();
+    }
+
+    private Key CharToKey(char character)
+    {
+        switch (character)
+        {
+            case 'A': return Key.A;
+            case 'B': return Key.B;
+            case 'C': return Key.C;
+            case 'D': return Key.D;
+            case 'E': return Key.E;
+            case 'F': return Key.F;
+            case 'G': return Key.G;
+            case 'H': return Key.H;
+            case 'I': return Key.I;
+            case 'J': return Key.J;
+            case 'K': return Key.K;
+            case 'L': return Key.L;
+            case 'M': return Key.M;
+            case 'N': return Key.N;
+            case 'O': return Key.O;
+            case 'P': return Key.P;
+            case 'Q': return Key.Q;
+            case 'R': return Key.R;
+            case 'S': return Key.S;
+            case 'T': return Key.T;
+            case 'U': return Key.U;
+            case 'V': return Key.V;
+            case 'W': return Key.W;
+            case 'X': return Key.X;
+            case 'Y': return Key.Y;
+            case 'Z': return Key.Z;
+            default: return Key.None;
+        }
+    }
+
+    private void SetupWordVisuals()
+    {
+        SetupRowVisuals(easyRow, activeWords[0]);
+        SetupRowVisuals(mediumRow, activeWords[1]);
+        SetupRowVisuals(hardRow, activeWords[2]);
+    }
+
+    private void SetupRowVisuals(WordVisualRow row, ActiveWord activeWord)
+    {
+        if (row == null || row.letters == null || activeWord == null)
+            return;
+
+        string word = activeWord.word;
+
+        for (int i = 0; i < row.letters.Length; i++)
+        {
+            if (row.letters[i] == null)
                 continue;
 
-            for (int i = 0; i < visualRow.letters.Length; i++)
+            if (i < word.Length)
             {
-                ComboLetterUI letter = visualRow.letters[i];
+                row.letters[i].SetLetter(word[i].ToString());
+            }
+            else
+            {
+                row.letters[i].HideLetter();
+            }
+        }
 
-                if (letter == null)
+        if (word.Length > row.letters.Length)
+        {
+            Debug.LogWarning(
+                "The word " + word + " is longer than the visual row " + row.rowName +
+                ". Add more letter slots to the row."
+            );
+        }
+    }
+
+    private void UpdateWordVisuals(int activeRow)
+    {
+        for (int rowIndex = 0; rowIndex < activeWords.Length; rowIndex++)
+        {
+            WordVisualRow row = GetRowByIndex(rowIndex);
+
+            if (row == null || row.letters == null)
+                continue;
+
+            for (int i = 0; i < row.letters.Length; i++)
+            {
+                ComboLetterUI letter = row.letters[i];
+
+                if (letter == null || !letter.gameObject.activeSelf)
                     continue;
 
-                if (row != activeRow)
+                if (rowIndex != activeRow)
                 {
                     letter.SetNormal();
                     continue;
@@ -283,50 +470,108 @@ public class PlayerAttackInput : MonoBehaviour
         }
     }
 
-    private void PlayCompletedComboAnimation(int rowIndex)
+    private void SetFirstLettersActive()
     {
-        if (comboVisualRows == null) return;
-        if (rowIndex < 0 || rowIndex >= comboVisualRows.Length) return;
+        SetFirstLetterActiveInRow(easyRow);
+        SetFirstLetterActiveInRow(mediumRow);
+        SetFirstLetterActiveInRow(hardRow);
+    }
 
-        ComboVisualRow row = comboVisualRows[rowIndex];
-
-        if (row == null || row.letters == null) return;
+    private void SetFirstLetterActiveInRow(WordVisualRow row)
+    {
+        if (row == null || row.letters == null || row.letters.Length == 0)
+            return;
 
         for (int i = 0; i < row.letters.Length; i++)
         {
-            if (row.letters[i] != null)
-                row.letters[i].PlaySuccessBounce();
+            if (row.letters[i] != null && row.letters[i].gameObject.activeSelf)
+            {
+                row.letters[i].SetActive();
+                return;
+            }
         }
     }
-    private void ResetAllComboVisuals()
+
+    private void PlayWrongWordFeedback(int rowIndex)
     {
-        if (comboVisualRows == null) return;
+        WordVisualRow row = GetRowByIndex(rowIndex);
 
-        for (int row = 0; row < comboVisualRows.Length; row++)
+        if (row == null || row.letters == null)
+            return;
+
+        for (int i = 0; i < row.letters.Length; i++)
         {
-            ComboVisualRow visualRow = comboVisualRows[row];
-
-            if (visualRow == null || visualRow.letters == null)
+            if (row.letters[i] == null || !row.letters[i].gameObject.activeSelf)
                 continue;
 
-            for (int i = 0; i < visualRow.letters.Length; i++)
-            {
-                if (visualRow.letters[i] != null)
-                    visualRow.letters[i].SetNormal();
-            }
+            row.letters[i].SetWrong();
+            row.letters[i].PlayWrongFeedback();
+        }
+    }
+
+    private void PlayCompletedWordAnimation(int rowIndex)
+    {
+        WordVisualRow row = GetRowByIndex(rowIndex);
+
+        if (row == null || row.letters == null)
+            return;
+
+        for (int i = 0; i < row.letters.Length; i++)
+        {
+            if (row.letters[i] == null || !row.letters[i].gameObject.activeSelf)
+                continue;
+
+            row.letters[i].PlaySuccessBounce();
+        }
+    }
+
+    private void ResetAllWordVisuals()
+    {
+        ResetRowVisuals(easyRow);
+        ResetRowVisuals(mediumRow);
+        ResetRowVisuals(hardRow);
+    }
+
+    private void ResetRowVisuals(WordVisualRow row)
+    {
+        if (row == null || row.letters == null)
+            return;
+
+        for (int i = 0; i < row.letters.Length; i++)
+        {
+            if (row.letters[i] != null && row.letters[i].gameObject.activeSelf)
+                row.letters[i].SetNormal();
         }
     }
 
     private bool IsValidVisualLetter(int rowIndex, int letterIndex)
     {
-        if (comboVisualRows == null) return false;
-        if (rowIndex < 0 || rowIndex >= comboVisualRows.Length) return false;
+        WordVisualRow row = GetRowByIndex(rowIndex);
 
-        ComboVisualRow row = comboVisualRows[rowIndex];
+        if (row == null || row.letters == null)
+            return false;
 
-        if (row == null || row.letters == null) return false;
-        if (letterIndex < 0 || letterIndex >= row.letters.Length) return false;
+        if (letterIndex < 0 || letterIndex >= row.letters.Length)
+            return false;
 
         return row.letters[letterIndex] != null;
+    }
+
+    private WordVisualRow GetRowByIndex(int index)
+    {
+        switch (index)
+        {
+            case 0:
+                return easyRow;
+
+            case 1:
+                return mediumRow;
+
+            case 2:
+                return hardRow;
+
+            default:
+                return null;
+        }
     }
 }
