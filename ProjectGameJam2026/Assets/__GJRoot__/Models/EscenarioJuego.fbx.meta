@@ -3,7 +3,37 @@ guid: f0e8954b4768c844a9872689ba42a5c6
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_Floor
+    second: {fileID: 2100000, guid: 261c10bfea4abe44bac609458d44be47, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_FloorStage
+    second: {fileID: 2100000, guid: 174467c9107b5e54185a0d088f1311bf, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_FrameTV
+    second: {fileID: 2100000, guid: 6643561d57ea3824c90a4150183f8702, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_Leds
+    second: {fileID: 2100000, guid: 2d466bb4fb11af44cb69a6ab745fe7b6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_ScreenTV
+    second: {fileID: 2100000, guid: b0dc9c5074311bc4d9b1eb78144f74de, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_SideStage
+    second: {fileID: 2100000, guid: 7df6ed8793cecf54199bdea498d880ee, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
