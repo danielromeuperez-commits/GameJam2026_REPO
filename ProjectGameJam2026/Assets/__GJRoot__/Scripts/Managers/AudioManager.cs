@@ -2,21 +2,24 @@ using UnityEngine;
 
 public class AudioManager : MonoBehaviour
 {
-    //Declaración del Singleton
     private static AudioManager instance;
+
     public static AudioManager Instance
     {
         get
         {
-            if (instance == null) Debug.Log("No hay GameManager!");
+            if (instance == null)
+                Debug.LogWarning("No hay AudioManager en la escena!");
+
             return instance;
         }
-
     }
-    //Fin del Singleton
 
+    [Header("Audio Sources")]
     public AudioSource musicSource;
     public AudioSource sfxSource;
+
+    [Header("Audio Libraries")]
     public AudioClip[] musicLibrary;
     public AudioClip[] sfxLibrary;
 
@@ -24,39 +27,60 @@ public class AudioManager : MonoBehaviour
     {
         if (instance == null)
         {
-            //Si no hay GameManager lo referenciamos y hacemos que perdure entre escenas
             instance = this;
+
+            // Hace que el AudioManager no se destruya al cambiar de escena
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
-            //Si ya hay GameManager, el duplicado se destruye
+            // Si ya existe uno, destruye el duplicado
             Destroy(gameObject);
         }
     }
 
     public void PlayMusic(int musicToPlay)
     {
-        musicSource.clip = musicLibrary[musicToPlay];
-        musicSource.Play(); //Reproducir la música desde el principio
+        if (musicSource == null) return;
+        if (musicLibrary == null || musicLibrary.Length == 0) return;
+        if (musicToPlay < 0 || musicToPlay >= musicLibrary.Length) return;
+
+        AudioClip selectedClip = musicLibrary[musicToPlay];
+
+        // Si ya está sonando esa misma música, no la reinicia
+        if (musicSource.clip == selectedClip && musicSource.isPlaying)
+        {
+            return;
+        }
+
+        musicSource.clip = selectedClip;
+        musicSource.Play();
     }
 
     public void PlaySFX(int sfxToPlay)
     {
+        if (sfxSource == null) return;
+        if (sfxLibrary == null || sfxLibrary.Length == 0) return;
+        if (sfxToPlay < 0 || sfxToPlay >= sfxLibrary.Length) return;
+
         sfxSource.PlayOneShot(sfxLibrary[sfxToPlay]);
     }
 
     public void StopMusic()
     {
-        musicSource.Stop();
+        if (musicSource != null)
+            musicSource.Stop();
     }
 
     public void PauseMusic()
     {
-        musicSource.Pause();
+        if (musicSource != null)
+            musicSource.Pause();
     }
 
     public void UnPauseMusic()
     {
-        musicSource.UnPause();
+        if (musicSource != null)
+            musicSource.UnPause();
     }
 }
