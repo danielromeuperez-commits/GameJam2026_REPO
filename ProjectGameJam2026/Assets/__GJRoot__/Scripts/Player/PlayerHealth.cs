@@ -10,6 +10,7 @@ public class PlayerHealth : MonoBehaviour
 
     [Header("UI")]
     public Image healthFill;
+    public HealthBarJuice healthBarJuice;
 
     [Header("Scene")]
     [SerializeField] string sceneName;
@@ -17,7 +18,7 @@ public class PlayerHealth : MonoBehaviour
     private void Start()
     {
         currentHealth = maxHealth;
-        UpdateHealthBar();
+        UpdateHealthBarInstant();
     }
 
     public void TakeDamage(int damage)
@@ -27,7 +28,7 @@ public class PlayerHealth : MonoBehaviour
         if (currentHealth < 0)
             currentHealth = 0;
 
-        UpdateHealthBar();
+        UpdateHealthBarWithFeedback();
 
         Debug.Log($"{gameObject.name} HP: {currentHealth}");
 
@@ -37,18 +38,36 @@ public class PlayerHealth : MonoBehaviour
         }
     }
 
-    private void UpdateHealthBar()
+    private void UpdateHealthBarInstant()
     {
+        float health01 = (float)currentHealth / maxHealth;
+
         if (healthFill != null)
+            healthFill.fillAmount = health01;
+
+        if (healthBarJuice != null)
+            healthBarJuice.SetHealth01Instant(health01);
+    }
+
+    private void UpdateHealthBarWithFeedback()
+    {
+        float health01 = (float)currentHealth / maxHealth;
+
+        if (healthBarJuice != null)
         {
-            healthFill.fillAmount =
-                (float)currentHealth / maxHealth;
+            healthBarJuice.SetHealth01(health01);
+        }
+        else if (healthFill != null)
+        {
+            healthFill.fillAmount = health01;
         }
     }
+
     private void Die()
     {
         Debug.Log($"{gameObject.name} has been defeated");
-        if (currentHealth <= 0)
+
+        if (!string.IsNullOrEmpty(sceneName))
         {
             SceneManager.LoadScene(sceneName);
         }

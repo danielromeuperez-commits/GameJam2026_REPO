@@ -27,6 +27,10 @@ public class ConversationBattleSystem : MonoBehaviour
     public int player1Score;
     public int player2Score;
 
+    [Header("Button Disappear Animation")]
+    public UIButtonGroupDisappear player1ButtonsDisappear;
+    public UIButtonGroupDisappear player2ButtonsDisappear;
+
     [Header("Conversation Time")]
     public int roundTime = 10;
 
@@ -435,6 +439,21 @@ public class ConversationBattleSystem : MonoBehaviour
 
         if (attackCountdownText != null)
             attackCountdownText.text = "ATTACK: " + Mathf.CeilToInt(timer);
+
+        Coroutine p1Disappear = null;
+        Coroutine p2Disappear = null;
+
+        if (player1ButtonsDisappear != null)
+            p1Disappear = StartCoroutine(player1ButtonsDisappear.PlayDisappearAll());
+
+        if (player2ButtonsDisappear != null)
+            p2Disappear = StartCoroutine(player2ButtonsDisappear.PlayDisappearAll());
+
+        if (p1Disappear != null)
+            yield return p1Disappear;
+
+        if (p2Disappear != null)
+            yield return p2Disappear;
 
         yield return StartCoroutine(OpenComboPanel());
 
