@@ -84,10 +84,71 @@ public class ConversationBattleSystem : MonoBehaviour
     private ConversationType[] player1Mapping = new ConversationType[3];
     private ConversationType[] player2Mapping = new ConversationType[3];
 
+    [Header("Gameplay Start Fade")]
+    public CanvasGroup startFadeCanvasGroup;
+    public float startFadeDuration = 1f;
+    public float startBlackHoldTime = 0.25f;
+    public bool useStartFadePulse = true;
+    public float startFadePulseScale = 1.05f;
+
     private void Start()
     {
         HideComboPanelInstant();
-        StartCoroutine(BeginRound());
+        StartCoroutine(GameplayStartRoutine());
+    }
+
+    private IEnumerator GameplayStartRoutine()
+    {
+        yield return StartCoroutine(PlayStartFade());
+
+        yield return StartCoroutine(BeginRound());
+    }
+
+    private IEnumerator PlayStartFade()
+    {
+        if (startFadeCanvasGroup == null)
+            yield break;
+
+        startFadeCanvasGroup.gameObject.SetActive(true);
+        startFadeCanvasGroup.alpha = 1f;
+        startFadeCanvasGroup.blocksRaycasts = true;
+        startFadeCanvasGroup.interactable = true;
+
+        RectTransform fadeRect = startFadeCanvasGroup.GetComponent<RectTransform>();
+
+        if (fadeRect != null)
+            fadeRect.localScale = Vector3.one;
+
+        yield return new WaitForSeconds(startBlackHoldTime);
+
+        float timer = 0f;
+
+        while (timer < startFadeDuration)
+        {
+            timer += Time.deltaTime;
+            float t = timer / startFadeDuration;
+
+            float smoothT = Mathf.SmoothStep(0f, 1f, t);
+
+            startFadeCanvasGroup.alpha = Mathf.Lerp(1f, 0f, smoothT);
+
+            if (useStartFadePulse && fadeRect != null)
+            {
+                float pulse = Mathf.Sin(t * Mathf.PI) * (startFadePulseScale - 1f);
+                fadeRect.localScale = Vector3.one * (1f + pulse);
+            }
+
+            yield return null;
+        }
+
+        startFadeCanvasGroup.alpha = 0f;
+
+        if (fadeRect != null)
+            fadeRect.localScale = Vector3.one;
+
+        startFadeCanvasGroup.blocksRaycasts = false;
+        startFadeCanvasGroup.interactable = false;
+        startFadeCanvasGroup.gameObject.SetActive(false);
     }
 
     private IEnumerator BeginRound()

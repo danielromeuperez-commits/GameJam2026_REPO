@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class MenuButtonJuice : MonoBehaviour, IPointerEnterHandler, ISelectHandler, IDeselectHandler
+public class MenuButtonJuice : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ISelectHandler, IDeselectHandler
 {
     [Header("Button Visuals")]
     public RectTransform buttonTransform;
@@ -12,8 +12,8 @@ public class MenuButtonJuice : MonoBehaviour, IPointerEnterHandler, ISelectHandl
     public Image buttonImage;
 
     [Header("Scale")]
-    public float normalScale = 1f;
-    public float selectedScale = 1.15f;
+    public float normalScaleMultiplier = 1f;
+    public float selectedScaleMultiplier = 1.15f;
 
     [Header("Rotation")]
     public float selectedRotation = -3f;
@@ -34,7 +34,11 @@ public class MenuButtonJuice : MonoBehaviour, IPointerEnterHandler, ISelectHandl
     public float animationSpeed = 10f;
 
     private Vector3 startPosition;
+    private Vector3 startScale;
+    private Quaternion startRotation;
+
     private Coroutine animationRoutine;
+    private bool selectedByMouse;
 
     private void Awake()
     {
@@ -48,13 +52,29 @@ public class MenuButtonJuice : MonoBehaviour, IPointerEnterHandler, ISelectHandl
             buttonImage = GetComponent<Image>();
 
         startPosition = buttonTransform.localPosition;
+        startScale = buttonTransform.localScale;
+        startRotation = buttonTransform.localRotation;
 
         SetDimmed();
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+        selectedByMouse = true;
         EventSystem.current.SetSelectedGameObject(gameObject);
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        if (!selectedByMouse)
+            return;
+
+        selectedByMouse = false;
+
+        if (EventSystem.current != null && EventSystem.current.currentSelectedGameObject == gameObject)
+            EventSystem.current.SetSelectedGameObject(null);
+
+        SetDimmed();
     }
 
     public void OnSelect(BaseEventData eventData)
@@ -75,11 +95,11 @@ public class MenuButtonJuice : MonoBehaviour, IPointerEnterHandler, ISelectHandl
         if (changeButtonImageColor && buttonImage != null)
             buttonImage.color = selectedImageColor;
 
-        StartButtonAnimation(
-            Vector3.one * selectedScale,
-            startPosition + new Vector3(selectedXOffset, 0f, 0f),
-            Quaternion.Euler(0f, 0f, selectedRotation)
-        );
+        Vector3 targetScale = startScale * selectedScaleMultiplier;
+        Vector3 targetPosition = startPosition + new Vector3(selectedXOffset, 0f, 0f);
+        Quaternion targetRotation = startRotation * Quaternion.Euler(0f, 0f, selectedRotation);
+
+        StartButtonAnimation(targetScale, targetPosition, targetRotation);
     }
 
     public void SetDimmed()
@@ -90,11 +110,9 @@ public class MenuButtonJuice : MonoBehaviour, IPointerEnterHandler, ISelectHandl
         if (changeButtonImageColor && buttonImage != null)
             buttonImage.color = dimImageColor;
 
-        StartButtonAnimation(
-            Vector3.one * normalScale,
-            startPosition,
-            Quaternion.identity
-        );
+        Vector3 targetScale = startScale * normalScaleMultiplier;
+
+        StartButtonAnimation(targetScale, startPosition, startRotation);
     }
 
     private void StartButtonAnimation(Vector3 targetScale, Vector3 targetPosition, Quaternion targetRotation)

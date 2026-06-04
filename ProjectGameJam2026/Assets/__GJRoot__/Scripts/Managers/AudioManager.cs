@@ -23,18 +23,22 @@ public class AudioManager : MonoBehaviour
     public AudioClip[] musicLibrary;
     public AudioClip[] sfxLibrary;
 
+    private float masterVolume = 1f;
+    private float musicVolume = 1f;
+    private float sfxVolume = 1f;
+
     private void Awake()
     {
         if (instance == null)
         {
             instance = this;
-
-            // Hace que el AudioManager no se destruya al cambiar de escena
             DontDestroyOnLoad(gameObject);
+
+            LoadAudioSettings();
+            ApplyVolumes();
         }
         else
         {
-            // Si ya existe uno, destruye el duplicado
             Destroy(gameObject);
         }
     }
@@ -47,11 +51,8 @@ public class AudioManager : MonoBehaviour
 
         AudioClip selectedClip = musicLibrary[musicToPlay];
 
-        // Si ya está sonando esa misma música, no la reinicia
         if (musicSource.clip == selectedClip && musicSource.isPlaying)
-        {
             return;
-        }
 
         musicSource.clip = selectedClip;
         musicSource.Play();
@@ -63,7 +64,59 @@ public class AudioManager : MonoBehaviour
         if (sfxLibrary == null || sfxLibrary.Length == 0) return;
         if (sfxToPlay < 0 || sfxToPlay >= sfxLibrary.Length) return;
 
-        sfxSource.PlayOneShot(sfxLibrary[sfxToPlay]);
+        sfxSource.PlayOneShot(sfxLibrary[sfxToPlay], masterVolume * sfxVolume);
+    }
+
+    public void SetMasterVolume(float value)
+    {
+        masterVolume = Mathf.Clamp01(value);
+        PlayerPrefs.SetFloat("MasterVolume", masterVolume);
+        ApplyVolumes();
+    }
+
+    public void SetMusicVolume(float value)
+    {
+        musicVolume = Mathf.Clamp01(value);
+        PlayerPrefs.SetFloat("MusicVolume", musicVolume);
+        ApplyVolumes();
+    }
+
+    public void SetSFXVolume(float value)
+    {
+        sfxVolume = Mathf.Clamp01(value);
+        PlayerPrefs.SetFloat("SFXVolume", sfxVolume);
+        ApplyVolumes();
+    }
+
+    public float GetMasterVolume()
+    {
+        return masterVolume;
+    }
+
+    public float GetMusicVolume()
+    {
+        return musicVolume;
+    }
+
+    public float GetSFXVolume()
+    {
+        return sfxVolume;
+    }
+
+    private void ApplyVolumes()
+    {
+        if (musicSource != null)
+            musicSource.volume = masterVolume * musicVolume;
+
+        if (sfxSource != null)
+            sfxSource.volume = masterVolume * sfxVolume;
+    }
+
+    private void LoadAudioSettings()
+    {
+        masterVolume = PlayerPrefs.GetFloat("MasterVolume", 1f);
+        musicVolume = PlayerPrefs.GetFloat("MusicVolume", 1f);
+        sfxVolume = PlayerPrefs.GetFloat("SFXVolume", 1f);
     }
 
     public void StopMusic()
