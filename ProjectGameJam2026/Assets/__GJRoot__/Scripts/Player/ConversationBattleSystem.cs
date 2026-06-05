@@ -34,6 +34,12 @@ public class ConversationBattleSystem : MonoBehaviour
     [Header("Conversation Time")]
     public int roundTime = 10;
 
+    [Header("SFX")]
+    public int answerSelectedSFXIndex = 2;
+    public bool useRandomPitchForAnswerSFX = true;
+    public float answerMinPitch = 0.95f;
+    public float answerMaxPitch = 1.05f;
+
     [Header("Attack Time")]
     public float attackTime = 10f;
 
@@ -215,11 +221,26 @@ public class ConversationBattleSystem : MonoBehaviour
             LockPlayer2Choice(player2Mapping[2]);
     }
 
+    // ---------------- SFX ----------------
+
+    private void PlayAnswerSelectedSFX()
+    {
+        if (AudioManager.Instance == null)
+            return;
+
+        if (useRandomPitchForAnswerSFX)
+            AudioManager.Instance.PlaySFXRandomPitch(answerSelectedSFXIndex, answerMinPitch, answerMaxPitch);
+        else
+            AudioManager.Instance.PlaySFX(answerSelectedSFXIndex);
+    }
+
     // ---------------- LOCK CHOICE ----------------
 
     private void LockPlayer1Choice(ConversationType choice)
     {
         player1Choice = choice;
+
+        PlayAnswerSelectedSFX();
 
         if (player1StatusText != null)
             player1StatusText.text = "Player 1 locked in its answer";
@@ -230,6 +251,8 @@ public class ConversationBattleSystem : MonoBehaviour
     private void LockPlayer2Choice(ConversationType choice)
     {
         player2Choice = choice;
+
+        PlayAnswerSelectedSFX();
 
         if (player2StatusText != null)
             player2StatusText.text = "Player 2 locked in its answer";
@@ -394,7 +417,6 @@ public class ConversationBattleSystem : MonoBehaviour
 
         StartCoroutine(AttackPhaseRoutine(winner));
     }
-
 
     private IEnumerator AttackPhaseRoutine(int winner)
     {

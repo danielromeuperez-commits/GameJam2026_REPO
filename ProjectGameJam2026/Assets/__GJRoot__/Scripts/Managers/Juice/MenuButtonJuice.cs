@@ -9,6 +9,13 @@ public class MenuButtonJuice : MonoBehaviour,
     ISelectHandler,
     IDeselectHandler
 {
+    public enum HoverMoveDirection
+    {
+        Horizontal,
+        Vertical,
+        None
+    }
+
     [Header("Button Visuals")]
     public RectTransform buttonTransform;
     public TMP_Text buttonText;
@@ -22,7 +29,9 @@ public class MenuButtonJuice : MonoBehaviour,
     public float selectedRotation = -3f;
 
     [Header("Hover Movement")]
+    public HoverMoveDirection hoverMoveDirection = HoverMoveDirection.Horizontal;
     public float selectedXOffset = 25f;
+    public float selectedYOffset = 20f;
 
     [Header("Text Colors")]
     public Color selectedTextColor = Color.black;
@@ -64,6 +73,9 @@ public class MenuButtonJuice : MonoBehaviour,
 
         if (buttonImage == null)
             buttonImage = GetComponent<Image>();
+
+        if (audioSource == null && AudioManager.Instance != null)
+            audioSource = AudioManager.Instance.musicSource;
 
         startPosition = buttonTransform.localPosition;
         startScale = buttonTransform.localScale;
@@ -125,6 +137,9 @@ public class MenuButtonJuice : MonoBehaviour,
     {
         isHovering = true;
 
+        if (audioSource == null && AudioManager.Instance != null)
+            audioSource = AudioManager.Instance.musicSource;
+
         if (audioSource != null)
             nextBeat = audioSource.time;
 
@@ -163,8 +178,22 @@ public class MenuButtonJuice : MonoBehaviour,
             buttonImage.color = selectedImageColor;
 
         targetBaseScale = startScale * selectedScaleMultiplier;
-        targetPosition = startPosition + new Vector3(selectedXOffset, 0f, 0f);
         targetRotation = startRotation * Quaternion.Euler(0f, 0f, selectedRotation);
+
+        switch (hoverMoveDirection)
+        {
+            case HoverMoveDirection.Horizontal:
+                targetPosition = startPosition + new Vector3(selectedXOffset, 0f, 0f);
+                break;
+
+            case HoverMoveDirection.Vertical:
+                targetPosition = startPosition + new Vector3(0f, selectedYOffset, 0f);
+                break;
+
+            case HoverMoveDirection.None:
+                targetPosition = startPosition;
+                break;
+        }
     }
 
     private void SetDimmed()

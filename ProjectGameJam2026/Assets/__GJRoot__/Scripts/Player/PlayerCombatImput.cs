@@ -86,6 +86,18 @@ public class PlayerAttackInput : MonoBehaviour
     [Header("UI")]
     public TMP_Text attackInfoText;
 
+    [Header("SFX")]
+    public int typedLetterSFXIndex = 3;
+    public int wrongLetterSFXIndex = 3;
+
+    public bool useRandomPitchForTypingSFX = true;
+
+    public float typedLetterMinPitch = 0.95f;
+    public float typedLetterMaxPitch = 1.08f;
+
+    public float wrongLetterMinPitch = 0.65f;
+    public float wrongLetterMaxPitch = 0.8f;
+
     public bool attackPerformed;
 
     private bool player1CanAttack;
@@ -133,17 +145,51 @@ public class PlayerAttackInput : MonoBehaviour
         CheckWords(previousRowIndex, previousExpectedIndex);
     }
 
+    private void PlayTypedLetterSFX()
+    {
+        if (AudioManager.Instance == null)
+            return;
+
+        if (useRandomPitchForTypingSFX)
+        {
+            AudioManager.Instance.PlaySFXRandomPitch(
+                typedLetterSFXIndex,
+                typedLetterMinPitch,
+                typedLetterMaxPitch
+            );
+        }
+        else
+        {
+            AudioManager.Instance.PlaySFX(typedLetterSFXIndex);
+        }
+    }
+
+    private void PlayWrongLetterSFX()
+    {
+        if (AudioManager.Instance == null)
+            return;
+
+        AudioManager.Instance.PlaySFXRandomPitch(
+            wrongLetterSFXIndex,
+            wrongLetterMinPitch,
+            wrongLetterMaxPitch
+        );
+    }
+
     private void CheckWords(int previousRowIndex, int previousExpectedIndex)
     {
         List<int> matchingRows = GetMatchingRowsWithCurrentInput();
 
         if (matchingRows.Count == 0)
         {
+            PlayWrongLetterSFX();
             WrongInput();
             return;
         }
 
         activeRowIndex = matchingRows[0];
+
+        PlayTypedLetterSFX();
 
         UpdateWordVisuals(matchingRows);
 
@@ -268,7 +314,7 @@ public class PlayerAttackInput : MonoBehaviour
 
     private List<int> GetRowsMatchingPreviousInput()
     {
-        List<int>  matchingRows = new List<int>();
+        List<int> matchingRows = new List<int>();
 
         if (inputBuffer.Count <= 1)
         {
@@ -323,7 +369,7 @@ public class PlayerAttackInput : MonoBehaviour
             attackInfoText.text = "Player 1 attack phase";
 
         Debug.Log("Player 1 can attack");
-       }
+    }
 
     public void EnablePlayer2Attack()
     {
@@ -358,6 +404,7 @@ public class PlayerAttackInput : MonoBehaviour
         ResetAllWordVisuals();
         SetFirstLettersActive();
     }
+
     public void DisableAttacks()
     {
         player1CanAttack = false;
@@ -606,7 +653,6 @@ public class PlayerAttackInput : MonoBehaviour
             float delay = distanceFromEdge * 0.08f;
 
             row.letters[i].PlaySuccessWave(delay);
-
         }
     }
 
