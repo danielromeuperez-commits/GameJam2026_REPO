@@ -4,7 +4,7 @@ using UnityEngine;
 public class PlaySceneMusic : MonoBehaviour
 {
     [Header("Music Index In AudioManager")]
-    public int musicIndex = 0;
+    public int musicIndex = 1;
 
     private IEnumerator Start()
     {
@@ -12,11 +12,12 @@ public class PlaySceneMusic : MonoBehaviour
 
         if (AudioManager.Instance == null)
         {
-            Debug.LogWarning("No AudioManager found. Start from Main Menu.");
+            Debug.LogWarning("No AudioManager found.");
             yield break;
         }
 
-        AudioManager.Instance.ApplyVolumes();
+        AudioManager.Instance.ResetMusicFadeMultiplier();
+        AudioManager.Instance.RefreshAudioVolumes();
         AudioManager.Instance.PlayMusic(musicIndex);
     }
 }

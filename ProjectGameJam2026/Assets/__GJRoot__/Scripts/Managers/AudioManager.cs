@@ -28,6 +28,8 @@ public class AudioManager : MonoBehaviour
     private float musicVolume = 1f;
     private float sfxVolume = 1f;
 
+    private float musicFadeMultiplier = 1f;
+
     private void Awake()
     {
         if (instance == null)
@@ -59,8 +61,7 @@ public class AudioManager : MonoBehaviour
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         CreateAudioSourcesIfNeeded();
-        LoadAudioSettings();
-        ApplyVolumes();
+        RefreshAudioVolumes();
     }
 
     private void CreateAudioSourcesIfNeeded()
@@ -97,18 +98,15 @@ public class AudioManager : MonoBehaviour
         AudioClip selectedClip = musicLibrary[musicToPlay];
 
         LoadAudioSettings();
-        ApplyVolumes();
-
-        if (musicSource.clip == selectedClip && musicSource.isPlaying)
-        {
-            musicSource.volume = masterVolume * musicVolume;
-            return;
-        }
+        ResetMusicFadeMultiplier();
 
         musicSource.clip = selectedClip;
-        musicSource.volume = masterVolume * musicVolume;
         musicSource.loop = true;
-        musicSource.Play();
+
+        ApplyVolumes();
+
+        if (!musicSource.isPlaying)
+            musicSource.Play();
 
         Debug.Log("Playing music: " + selectedClip.name + " | Volume: " + musicSource.volume);
     }
@@ -121,6 +119,8 @@ public class AudioManager : MonoBehaviour
         if (sfxLibrary == null || sfxLibrary.Length == 0) return;
         if (sfxToPlay < 0 || sfxToPlay >= sfxLibrary.Length) return;
 
+        LoadAudioSettings();
+
         sfxSource.PlayOneShot(sfxLibrary[sfxToPlay], masterVolume * sfxVolume);
     }
 
@@ -131,6 +131,8 @@ public class AudioManager : MonoBehaviour
         if (sfxSource == null) return;
         if (sfxLibrary == null || sfxLibrary.Length == 0) return;
         if (sfxToPlay < 0 || sfxToPlay >= sfxLibrary.Length) return;
+
+        LoadAudioSettings();
 
         float originalPitch = sfxSource.pitch;
 
@@ -168,17 +170,38 @@ public class AudioManager : MonoBehaviour
 
     public float GetMasterVolume()
     {
+        LoadAudioSettings();
         return masterVolume;
     }
 
     public float GetMusicVolume()
     {
+        LoadAudioSettings();
         return musicVolume;
     }
 
     public float GetSFXVolume()
     {
+        LoadAudioSettings();
         return sfxVolume;
+    }
+
+    public void SetMusicFadeMultiplier(float value)
+    {
+        musicFadeMultiplier = Mathf.Clamp01(value);
+        ApplyVolumes();
+    }
+
+    public void ResetMusicFadeMultiplier()
+    {
+        musicFadeMultiplier = 1f;
+        ApplyVolumes();
+    }
+
+    public void RefreshAudioVolumes()
+    {
+        LoadAudioSettings();
+        ApplyVolumes();
     }
 
     public void ApplyVolumes()
@@ -186,7 +209,7 @@ public class AudioManager : MonoBehaviour
         CreateAudioSourcesIfNeeded();
 
         if (musicSource != null)
-            musicSource.volume = masterVolume * musicVolume;
+            musicSource.volume = masterVolume * musicVolume * musicFadeMultiplier;
 
         if (sfxSource != null)
             sfxSource.volume = masterVolume * sfxVolume;

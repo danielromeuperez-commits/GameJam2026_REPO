@@ -12,6 +12,9 @@ public class PlayerHealth : MonoBehaviour
     public Image healthFill;
     public HealthBarJuice healthBarJuice;
 
+    [Header("Player")]
+    public int playerNumber = 1;
+
     [Header("Scene")]
     [SerializeField] string sceneName;
 
@@ -67,9 +70,11 @@ public class PlayerHealth : MonoBehaviour
     {
         Debug.Log($"{gameObject.name} has been defeated");
 
-        if (!string.IsNullOrEmpty(sceneName))
-        {
-            SceneManager.LoadScene(sceneName);
-        }
+        if (VictoryManager.Instance == null)
+            return;
+
+        int winner = playerNumber == 1 ? 2 : 1;
+
+        VictoryManager.Instance.ShowVictory(winner);
     }
 }

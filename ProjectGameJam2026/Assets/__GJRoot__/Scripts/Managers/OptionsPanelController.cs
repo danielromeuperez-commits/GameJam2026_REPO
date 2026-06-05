@@ -1,95 +1,154 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 public class OptionsPanelController : MonoBehaviour
 {
-    [Header("Options Panel")]
-    public RectTransform optionsPanel;
+    [Header("Panel")]
+    public GameObject optionsPanel;
 
-    [Header("Navigators")]
-    public KeyboardMenuNavigator mainMenuNavigator;
-    public OptionsSliderKeyboardController optionsSliderController;
-
-    [Header("Scale Animation")]
-    public Vector3 hiddenScale = new Vector3(0.1f, 0.1f, 0.1f);
-    public Vector3 visibleScale = Vector3.one;
-    public float scaleSpeed = 8f;
+    [Header("Animation")]
+    public float hiddenScale = 0.05f;
+    public float visibleScale = 1f;
+    public float animationDuration = 0.25f;
 
     private bool isOpen;
-    private Coroutine scaleRoutine;
+    private bool isAnimating;
+    private Coroutine currentRoutine;
+    private CanvasGroup panelCanvasGroup;
 
-    private void Start()
+    private void Awake()
     {
+        if (optionsPanel != null)
+        {
+            panelCanvasGroup = optionsPanel.GetComponent<CanvasGroup>();
+
+            if (panelCanvasGroup == null)
+                panelCanvasGroup = optionsPanel.AddComponent<CanvasGroup>();
+        }
+
         HideInstant();
+    }
+
+    public void ToggleOptions()
+    {
+        if (isAnimating)
+            return;
+
+        if (isOpen)
+            CloseOptions();
+        else
+            OpenOptions();
     }
 
     public void OpenOptions()
     {
-        if (isOpen) return;
+        if (optionsPanel == null)
+            return;
 
-        isOpen = true;
+        if (isAnimating || isOpen)
+            return;
 
-        if (mainMenuNavigator != null)
-            mainMenuNavigator.SetNavigationEnabled(false);
+        if (currentRoutine != null)
+            StopCoroutine(currentRoutine);
 
-        if (scaleRoutine != null)
-            StopCoroutine(scaleRoutine);
-
-        optionsPanel.gameObject.SetActive(true);
-        scaleRoutine = StartCoroutine(OpenPanelRoutine());
+        currentRoutine = StartCoroutine(OpenRoutine());
     }
 
     public void CloseOptions()
     {
-        if (!isOpen) return;
-
-        isOpen = false;
-
-        if (optionsSliderController != null)
-            optionsSliderController.SetNavigationEnabled(false);
-
-        if (scaleRoutine != null)
-            StopCoroutine(scaleRoutine);
-
-        scaleRoutine = StartCoroutine(ClosePanelRoutine());
-    }
-
-    private IEnumerator OpenPanelRoutine()
-    {
-        yield return StartCoroutine(ScalePanel(visibleScale));
-
-        if (optionsSliderController != null)
-            optionsSliderController.SetNavigationEnabled(true);
-    }
-
-    private IEnumerator ClosePanelRoutine()
-    {
-        yield return StartCoroutine(ScalePanel(hiddenScale));
-
-        optionsPanel.gameObject.SetActive(false);
-
-        if (mainMenuNavigator != null)
-            mainMenuNavigator.SetNavigationEnabled(true);
-    }
-
-    private IEnumerator ScalePanel(Vector3 targetScale)
-    {
         if (optionsPanel == null)
-            yield break;
+            return;
 
-        while (Vector3.Distance(optionsPanel.localScale, targetScale) > 0.01f)
+        if (isAnimating || !isOpen)
+            return;
+
+        if (currentRoutine != null)
+            StopCoroutine(currentRoutine);
+
+        currentRoutine = StartCoroutine(CloseRoutine());
+    }
+
+    private IEnumerator OpenRoutine()
+    {
+        isAnimating = true;
+        isOpen = true;
+
+        optionsPanel.SetActive(true);
+
+        if (panelCanvasGroup != null)
         {
-            optionsPanel.localScale = Vector3.Lerp(
-                optionsPanel.localScale,
-                targetScale,
-                Time.deltaTime * scaleSpeed
-            );
+            panelCanvasGroup.alpha = 1f;
+            panelCanvasGroup.interactable = false;
+            panelCanvasGroup.blocksRaycasts = false;
+        }
+
+        Vector3 startScale = Vector3.one * hiddenScale;
+        Vector3 endScale = Vector3.one * visibleScale;
+
+        optionsPanel.transform.localScale = startScale;
+
+        float timer = 0f;
+
+        while (timer < animationDuration)
+        {
+            timer += Time.deltaTime;
+
+            float t = timer / animationDuration;
+            float smoothT = Mathf.SmoothStep(0f, 1f, t);
+
+            optionsPanel.transform.localScale = Vector3.Lerp(startScale, endScale, smoothT);
 
             yield return null;
         }
 
-        optionsPanel.localScale = targetScale;
+        optionsPanel.transform.localScale = endScale;
+
+        if (panelCanvasGroup != null)
+        {
+            panelCanvasGroup.interactable = true;
+            panelCanvasGroup.blocksRaycasts = true;
+        }
+
+        isAnimating = false;
+        currentRoutine = null;
+    }
+
+    private IEnumerator CloseRoutine()
+    {
+        isAnimating = true;
+
+        if (panelCanvasGroup != null)
+        {
+            panelCanvasGroup.interactable = false;
+            panelCanvasGroup.blocksRaycasts = false;
+        }
+
+        Vector3 startScale = optionsPanel.transform.localScale;
+        Vector3 endScale = Vector3.one * hiddenScale;
+
+        float timer = 0f;
+
+        while (timer < animationDuration)
+        {
+            timer += Time.deltaTime;
+
+            float t = timer / animationDuration;
+            float smoothT = Mathf.SmoothStep(0f, 1f, t);
+
+            optionsPanel.transform.localScale = Vector3.Lerp(startScale, endScale, smoothT);
+
+            yield return null;
+        }
+
+        optionsPanel.transform.localScale = endScale;
+
+        yield return new WaitForSeconds(0.05f);
+
+        optionsPanel.SetActive(false);
+
+        isOpen = false;
+        isAnimating = false;
+        currentRoutine = null;
     }
 
     private void HideInstant()
@@ -97,11 +156,17 @@ public class OptionsPanelController : MonoBehaviour
         if (optionsPanel == null)
             return;
 
-        optionsPanel.localScale = hiddenScale;
-        optionsPanel.gameObject.SetActive(false);
-        isOpen = false;
+        optionsPanel.transform.localScale = Vector3.one * hiddenScale;
+        optionsPanel.SetActive(false);
 
-        if (optionsSliderController != null)
-            optionsSliderController.SetNavigationEnabled(false);
+        if (panelCanvasGroup != null)
+        {
+            panelCanvasGroup.alpha = 1f;
+            panelCanvasGroup.interactable = false;
+            panelCanvasGroup.blocksRaycasts = false;
+        }
+
+        isOpen = false;
+        isAnimating = false;
     }
 }

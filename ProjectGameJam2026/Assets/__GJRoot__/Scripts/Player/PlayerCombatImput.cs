@@ -83,6 +83,11 @@ public class PlayerAttackInput : MonoBehaviour
     public WordVisualRow mediumRow;
     public WordVisualRow hardRow;
 
+    [Header("Difficulty Circle Feedback")]
+    public ComboCircleUI easyCircle;
+    public ComboCircleUI mediumCircle;
+    public ComboCircleUI hardCircle;
+
     [Header("UI")]
     public TMP_Text attackInfoText;
 
@@ -304,6 +309,7 @@ public class PlayerAttackInput : MonoBehaviour
         for (int i = 0; i < previousMatchingRows.Count; i++)
         {
             PlayWrongWordFeedback(previousMatchingRows[i]);
+            PlayWrongCircleFeedback(previousMatchingRows[i]);
         }
 
         inputBuffer.Clear();
@@ -347,6 +353,32 @@ public class PlayerAttackInput : MonoBehaviour
         inputBuffer.Add(wrongKey);
 
         return matchingRows;
+    }
+
+    private void PlayWrongCircleFeedback(int rowIndex)
+    {
+        ComboCircleUI circle = GetCircleByIndex(rowIndex);
+
+        if (circle != null)
+            circle.PlayShake();
+    }
+
+    private ComboCircleUI GetCircleByIndex(int index)
+    {
+        switch (index)
+        {
+            case 0:
+                return easyCircle;
+
+            case 1:
+                return mediumCircle;
+
+            case 2:
+                return hardCircle;
+
+            default:
+                return null;
+        }
     }
 
     public void EnablePlayer1Attack()
