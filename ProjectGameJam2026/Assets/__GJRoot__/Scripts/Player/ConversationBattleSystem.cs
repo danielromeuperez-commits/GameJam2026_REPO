@@ -40,6 +40,13 @@ public class ConversationBattleSystem : MonoBehaviour
     public float answerMinPitch = 0.95f;
     public float answerMaxPitch = 1.05f;
 
+    [Header("Draw SFX")]
+    public int drawSFXIndex = 5;
+    public bool useRandomPitchForDrawSFX = true;
+    public float drawMinPitch = 0.95f;
+    public float drawMaxPitch = 1.05f;
+    public float drawSFXDelay = 0.35f;
+
     [Header("Attack Time")]
     public float attackTime = 10f;
 
@@ -187,8 +194,18 @@ public class ConversationBattleSystem : MonoBehaviour
         }
     }
 
-    // ---------------- INPUT ----------------
+    private IEnumerator PlayDrawSFXDelayed()
+    {
+        yield return new WaitForSeconds(drawSFXDelay);
 
+        if (AudioManager.Instance == null)
+            yield break;
+
+        if (useRandomPitchForDrawSFX)
+            AudioManager.Instance.PlaySFXRandomPitch(drawSFXIndex, drawMinPitch, drawMaxPitch);
+        else
+            AudioManager.Instance.PlaySFX(drawSFXIndex);
+    }
     private void ReadPlayer1Input()
     {
         if (player1Choice != ConversationType.None)
@@ -221,8 +238,6 @@ public class ConversationBattleSystem : MonoBehaviour
             LockPlayer2Choice(player2Mapping[2]);
     }
 
-    // ---------------- SFX ----------------
-
     private void PlayAnswerSelectedSFX()
     {
         if (AudioManager.Instance == null)
@@ -233,8 +248,6 @@ public class ConversationBattleSystem : MonoBehaviour
         else
             AudioManager.Instance.PlaySFX(answerSelectedSFXIndex);
     }
-
-    // ---------------- LOCK CHOICE ----------------
 
     private void LockPlayer1Choice(ConversationType choice)
     {
@@ -259,8 +272,6 @@ public class ConversationBattleSystem : MonoBehaviour
 
         Debug.Log("Player 2 chose: " + choice);
     }
-
-    // ---------------- ROUND ----------------
 
     private void StartNewRound()
     {
@@ -427,7 +438,9 @@ public class ConversationBattleSystem : MonoBehaviour
             if (conversationCountdownText != null)
                 conversationCountdownText.text = "DRAW";
 
-            yield return new WaitForSeconds(2f);
+            yield return StartCoroutine(PlayDrawSFXDelayed());
+
+            yield return new WaitForSeconds(1.6f);
 
             yield return StartCoroutine(BeginRound());
             yield break;
@@ -515,10 +528,13 @@ public class ConversationBattleSystem : MonoBehaviour
 
         yield return StartCoroutine(CloseComboPanel());
 
+        if (attackWasPerformed && attackSystem != null)
+        {
+            yield return StartCoroutine(attackSystem.PlayPendingComboAnimationAndDamage());
+        }
+
         yield return StartCoroutine(BeginRound());
     }
-
-    // ---------------- COMBO PANEL ----------------
 
     private IEnumerator OpenComboPanel()
     {
@@ -569,8 +585,6 @@ public class ConversationBattleSystem : MonoBehaviour
         }
     }
 
-    // ---------------- COUNTER ATTACK TEXT ----------------
-
     private void SetCounterAttackText(int winner)
     {
         if (counterAttackText == null)
@@ -589,8 +603,6 @@ public class ConversationBattleSystem : MonoBehaviour
             counterAttackText.text = "";
         }
     }
-
-    // ---------------- WIN LOGIC ----------------
 
     private int GetWinner()
     {

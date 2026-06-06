@@ -2978,7 +2978,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9823f5731b7d4a4fb57d5bd4fda11a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAttackInput
-  player1Health: {fileID: 1504763045}
+  player1Health: {fileID: 422429397}
   player2Health: {fileID: 128644233}
   easyWords:
     difficultyName: Easy
@@ -3050,17 +3050,26 @@ MonoBehaviour:
   hardCircle: {fileID: 1528202542}
   attackInfoText: {fileID: 0}
   typedLetterSFXIndex: 3
-  wrongLetterSFXIndex: 3
+  wrongLetterSFXIndex: 6
   useRandomPitchForTypingSFX: 1
   typedLetterMinPitch: 0.95
   typedLetterMaxPitch: 1.08
   wrongLetterMinPitch: 0.65
   wrongLetterMaxPitch: 0.8
-  attackPerformed: 0
   comboHitSFXIndex: 4
   useRandomPitchForComboHitSFX: 1
   comboHitMinPitch: 0.95
   comboHitMaxPitch: 1.05
+  player1Animator: {fileID: 422429396}
+  player2Animator: {fileID: 0}
+  basicComboStateName: pl_anim_comboB_q
+  mediumComboStateName: pl_anim_comboM_q
+  fullComboStateName: pl_anim_comboF_q
+  idleStateName: pl_anim_idle_q
+  animationCrossFadeTime: 0.05
+  damageMomentDelay: 0.45
+  comboAnimationTotalTime: 1.2
+  attackPerformed: 0
 --- !u!4 &388661138
 Transform:
   m_ObjectHideFlags: 0
@@ -3240,6 +3249,24 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &422429397
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 422429395}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4292cad266412e64cb04b76b751289d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
+  maxHealth: 150
+  currentHealth: 0
+  healthFill: {fileID: 506546243}
+  healthBarJuice: {fileID: 506546246}
+  playerNumber: 1
+  sceneName: MainMenu
 --- !u!1001 &444339337
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8453,6 +8480,11 @@ MonoBehaviour:
   useRandomPitchForAnswerSFX: 1
   answerMinPitch: 0.95
   answerMaxPitch: 1.05
+  drawSFXIndex: 5
+  useRandomPitchForDrawSFX: 1
+  drawMinPitch: 0.95
+  drawMaxPitch: 1.05
+  drawSFXDelay: 0.35
   attackTime: 10
   conversationCountdownText: {fileID: 354149443}
   attackCountdownText: {fileID: 2006305089}
@@ -10025,137 +10057,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1485398003}
   m_CullTransparentMesh: 1
---- !u!1 &1504763044
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1504763049}
-  - component: {fileID: 1504763048}
-  - component: {fileID: 1504763047}
-  - component: {fileID: 1504763046}
-  - component: {fileID: 1504763045}
-  m_Layer: 0
-  m_Name: p1
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1504763045
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1504763044}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4292cad266412e64cb04b76b751289d2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
-  maxHealth: 150
-  currentHealth: 0
-  healthFill: {fileID: 506546243}
-  healthBarJuice: {fileID: 506546246}
-  playerNumber: 1
-  sceneName: MainMenu
---- !u!65 &1504763046
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1504763044}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!23 &1504763047
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1504763044}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
-  m_ForceMeshLod: -1
-  m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_MaskInteraction: 0
-  m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &1504763048
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1504763044}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!4 &1504763049
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1504763044}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.79, y: 5.5, z: 3.09}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1506536449
 GameObject:
   m_ObjectHideFlags: 0
@@ -14525,7 +14426,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 619869391846867051, guid: fa3b5e8db28db6641b34d89fc35d5d62, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.053
+      value: -1.92
       objectReference: {fileID: 0}
     - target: {fileID: 619869391846867051, guid: fa3b5e8db28db6641b34d89fc35d5d62, type: 3}
       propertyPath: m_LocalPosition.y
@@ -14533,7 +14434,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 619869391846867051, guid: fa3b5e8db28db6641b34d89fc35d5d62, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 2.988
+      value: 2.99
       objectReference: {fileID: 0}
     - target: {fileID: 619869391846867051, guid: fa3b5e8db28db6641b34d89fc35d5d62, type: 3}
       propertyPath: m_LocalRotation.w
@@ -14566,7 +14467,7 @@ PrefabInstance:
     - target: {fileID: 2111520150811815565, guid: fa3b5e8db28db6641b34d89fc35d5d62, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: a07febddd7395c54e9a3cadbac3301b9, type: 2}
+      objectReference: {fileID: 2100000, guid: b09809b81f35e4f46a20170dc2af19ce, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -14574,6 +14475,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 275255322474175185, guid: fa3b5e8db28db6641b34d89fc35d5d62, type: 3}
       insertIndex: -1
       addedObject: {fileID: 422429396}
+    - targetCorrespondingSourceObject: {fileID: 275255322474175185, guid: fa3b5e8db28db6641b34d89fc35d5d62, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 422429397}
   m_SourcePrefab: {fileID: 100100000, guid: fa3b5e8db28db6641b34d89fc35d5d62, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
@@ -14599,7 +14503,6 @@ SceneRoots:
   - {fileID: 444339337}
   - {fileID: 185340838}
   - {fileID: 1224319589}
-  - {fileID: 1504763049}
   - {fileID: 128644237}
   - {fileID: 332461739}
   - {fileID: 1804940901}

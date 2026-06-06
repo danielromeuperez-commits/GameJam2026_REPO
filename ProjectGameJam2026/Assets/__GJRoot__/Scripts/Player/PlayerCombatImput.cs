@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -93,7 +94,7 @@ public class PlayerAttackInput : MonoBehaviour
 
     [Header("SFX")]
     public int typedLetterSFXIndex = 3;
-    public int wrongLetterSFXIndex = 3;
+    public int wrongLetterSFXIndex = 6;
 
     public bool useRandomPitchForTypingSFX = true;
 
@@ -102,6 +103,25 @@ public class PlayerAttackInput : MonoBehaviour
 
     public float wrongLetterMinPitch = 0.65f;
     public float wrongLetterMaxPitch = 0.8f;
+
+    [Header("Combo Hit SFX")]
+    public int comboHitSFXIndex = 4;
+    public bool useRandomPitchForComboHitSFX = true;
+    public float comboHitMinPitch = 0.95f;
+    public float comboHitMaxPitch = 1.05f;
+
+    [Header("Combo Animation")]
+    public Animator player1Animator;
+    public Animator player2Animator;
+
+    public string basicComboStateName = "pl_anim_comboB_q";
+    public string mediumComboStateName = "pl_anim_comboM_q";
+    public string fullComboStateName = "pl_anim_comboF_q";
+    public string idleStateName = "pl_anim_idle_q";
+
+    public float animationCrossFadeTime = 0.05f;
+    public float damageMomentDelay = 0.45f;
+    public float comboAnimationTotalTime = 1.2f;
 
     public bool attackPerformed;
 
@@ -114,12 +134,11 @@ public class PlayerAttackInput : MonoBehaviour
 
     private int activeRowIndex = -1;
 
-    [Header("Combo Hit SFX")]
-    public int comboHitSFXIndex = 4;
-    public bool useRandomPitchForComboHitSFX = true;
-    public float comboHitMinPitch = 0.95f;
-    public float comboHitMaxPitch = 1.05f;
-
+    private int pendingAttackerPlayer;
+    private int pendingComboRowIndex = -1;
+    private int pendingDamage;
+    private PlayerHealth pendingTargetHealth;
+    private bool hasPendingComboDamage;
 
     private void Update()
     {
@@ -186,6 +205,25 @@ public class PlayerAttackInput : MonoBehaviour
             wrongLetterMinPitch,
             wrongLetterMaxPitch
         );
+    }
+
+    private void PlayComboHitSFX()
+    {
+        if (AudioManager.Instance == null)
+            return;
+
+        if (useRandomPitchForComboHitSFX)
+        {
+            AudioManager.Instance.PlaySFXRandomPitch(
+                comboHitSFXIndex,
+                comboHitMinPitch,
+                comboHitMaxPitch
+            );
+        }
+        else
+        {
+            AudioManager.Instance.PlaySFX(comboHitSFXIndex);
+        }
     }
 
     private void CheckWords(int previousRowIndex, int previousExpectedIndex)
@@ -271,42 +309,91 @@ public class PlayerAttackInput : MonoBehaviour
             return;
 
         PlayCompletedWordAnimation(activeRowIndex);
-        PlayComboHitSFX();
+
+        pendingComboRowIndex = activeRowIndex;
+        pendingDamage = word.damage;
+        hasPendingComboDamage = true;
 
         if (player1CanAttack)
         {
-            if (player2Health != null)
-                player2Health.TakeDamage(word.damage);
+            pendingAttackerPlayer = 1;
+            pendingTargetHealth = player2Health;
 
             FinishAttack("Player 1 used " + word.word + " | Damage: " + word.damage);
         }
         else if (player2CanAttack)
         {
-            if (player1Health != null)
-                player1Health.TakeDamage(word.damage);
+            pendingAttackerPlayer = 2;
+            pendingTargetHealth = player1Health;
 
             FinishAttack("Player 2 used " + word.word + " | Damage: " + word.damage);
         }
     }
 
-    private void PlayComboHitSFX()
+    public IEnumerator PlayPendingComboAnimationAndDamage()
     {
-        if (AudioManager.Instance == null)
-            return;
+        if (!hasPendingComboDamage)
+            yield break;
 
-        if (useRandomPitchForComboHitSFX)
+        Animator attackerAnimator = null;
+
+        if (pendingAttackerPlayer == 1)
+            attackerAnimator = player1Animator;
+        else if (pendingAttackerPlayer == 2)
+            attackerAnimator = player2Animator;
+
+        string animationStateName = GetComboAnimationStateName(pendingComboRowIndex);
+
+        if (attackerAnimator != null && !string.IsNullOrEmpty(animationStateName))
         {
-            AudioManager.Instance.PlaySFXRandomPitch(
-                comboHitSFXIndex,
-                comboHitMinPitch,
-                comboHitMaxPitch
-                );
-        }
-        else
-        {
-            AudioManager.Instance.PlaySFX(comboHitSFXIndex);
+            attackerAnimator.CrossFade(animationStateName, animationCrossFadeTime);
         }
 
+        yield return new WaitForSeconds(damageMomentDelay);
+
+        PlayComboHitSFX();
+
+        if (pendingTargetHealth != null)
+            pendingTargetHealth.TakeDamage(pendingDamage);
+
+        float remainingTime = comboAnimationTotalTime - damageMomentDelay;
+
+        if (remainingTime > 0f)
+            yield return new WaitForSeconds(remainingTime);
+
+        if (attackerAnimator != null && !string.IsNullOrEmpty(idleStateName))
+        {
+            attackerAnimator.CrossFade(idleStateName, animationCrossFadeTime);
+        }
+
+        ClearPendingComboDamage();
+    }
+
+    private string GetComboAnimationStateName(int rowIndex)
+    {
+        switch (rowIndex)
+        {
+            case 0:
+                return basicComboStateName;
+
+            case 1:
+                return mediumComboStateName;
+
+            case 2:
+                return fullComboStateName;
+
+            default:
+                return basicComboStateName;
+        }
+    }
+
+    private void ClearPendingComboDamage()
+    {
+        pendingAttackerPlayer = 0;
+        pendingComboRowIndex = -1;
+        pendingDamage = 0;
+        pendingTargetHealth = null;
+        hasPendingComboDamage = false;
     }
 
     private void FinishAttack(string msg)

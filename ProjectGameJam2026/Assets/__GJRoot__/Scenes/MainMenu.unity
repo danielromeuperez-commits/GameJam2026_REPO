@@ -6385,7 +6385,7 @@ PrefabInstance:
       objectReference: {fileID: 419131336}
     - target: {fileID: 790670897720591295, guid: 8ce554edbc4a77d4cab367632a74ced4, type: 3}
       propertyPath: sfxLibrary.Array.size
-      value: 5
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 790670897720591295, guid: 8ce554edbc4a77d4cab367632a74ced4, type: 3}
       propertyPath: 'sfxLibrary.Array.data[0]'
@@ -6407,6 +6407,14 @@ PrefabInstance:
       propertyPath: 'sfxLibrary.Array.data[4]'
       value: 
       objectReference: {fileID: 8300000, guid: a7950769bfd172d4d87067e67aa36184, type: 3}
+    - target: {fileID: 790670897720591295, guid: 8ce554edbc4a77d4cab367632a74ced4, type: 3}
+      propertyPath: 'sfxLibrary.Array.data[5]'
+      value: 
+      objectReference: {fileID: 8300000, guid: 52dcc77ada3bce446a4b5451046ce7a4, type: 3}
+    - target: {fileID: 790670897720591295, guid: 8ce554edbc4a77d4cab367632a74ced4, type: 3}
+      propertyPath: 'sfxLibrary.Array.data[6]'
+      value: 
+      objectReference: {fileID: 8300000, guid: 48e47a58e7f83b74c93634c06c7a988e, type: 3}
     - target: {fileID: 2835432904121849601, guid: 8ce554edbc4a77d4cab367632a74ced4, type: 3}
       propertyPath: m_Name
       value: AudioManager
