@@ -5,14 +5,14 @@ using UnityEngine.UI;
 public class AttackTimeModifier : MonoBehaviour
 {
     [Header("Base settings")]
-    public float baseAttackTime = 10f;
+    public float baseAttackTime = 5f;
 
     [Header("Warning UI")]
     public CanvasGroup warningCanvas;   // Canvas con alpha control
     public float flashDuration = 0.2f;
     public int flashCount = 3;
 
-    private float resultTime = 10f;
+    private float resultTime = 5f;
 
     public IEnumerator PrepareAttack(System.Action<float> onReady)
     {
@@ -20,7 +20,7 @@ public class AttackTimeModifier : MonoBehaviour
         Debug.Log(r);
         if(r <= 0.15f) 
         {
-            resultTime = 5f;
+            resultTime = 2f;
 
             if (warningCanvas != null)
             {
@@ -29,7 +29,7 @@ public class AttackTimeModifier : MonoBehaviour
         }
         else if(r <= 0.25f) 
         {
-            resultTime = 15f;
+            resultTime = 7f;
 
             if (warningCanvas != null)
             {

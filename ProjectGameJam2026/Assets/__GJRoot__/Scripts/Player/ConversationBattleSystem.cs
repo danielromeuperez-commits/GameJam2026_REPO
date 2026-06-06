@@ -48,7 +48,7 @@ public class ConversationBattleSystem : MonoBehaviour
     public float drawSFXDelay = 0.35f;
 
     [Header("Attack Time")]
-    public float attackTime = 10f;
+    public float attackTime = 5f;
 
     [Header("UI")]
     public TMP_Text conversationCountdownText;
@@ -473,7 +473,7 @@ public class ConversationBattleSystem : MonoBehaviour
         }
 
         if (attackCountdownText != null)
-            attackCountdownText.text = "ATTACK: " + Mathf.CeilToInt(timer);
+            attackCountdownText.text = "" + Mathf.CeilToInt(timer);
 
         Coroutine p1Disappear = null;
         Coroutine p2Disappear = null;
@@ -500,7 +500,7 @@ public class ConversationBattleSystem : MonoBehaviour
         while (timer > 0f && !attackSystem.attackPerformed)
         {
             if (attackCountdownText != null)
-                attackCountdownText.text = "ATTACK: " + Mathf.CeilToInt(timer);
+                attackCountdownText.text = "" + Mathf.CeilToInt(timer);
 
             timer -= Time.deltaTime;
             yield return null;
