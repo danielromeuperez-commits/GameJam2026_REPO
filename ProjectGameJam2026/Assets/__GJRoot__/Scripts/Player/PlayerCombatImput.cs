@@ -114,6 +114,13 @@ public class PlayerAttackInput : MonoBehaviour
 
     private int activeRowIndex = -1;
 
+    [Header("Combo Hit SFX")]
+    public int comboHitSFXIndex = 4;
+    public bool useRandomPitchForComboHitSFX = true;
+    public float comboHitMinPitch = 0.95f;
+    public float comboHitMaxPitch = 1.05f;
+
+
     private void Update()
     {
         if (!player1CanAttack && !player2CanAttack) return;
@@ -264,6 +271,7 @@ public class PlayerAttackInput : MonoBehaviour
             return;
 
         PlayCompletedWordAnimation(activeRowIndex);
+        PlayComboHitSFX();
 
         if (player1CanAttack)
         {
@@ -279,6 +287,26 @@ public class PlayerAttackInput : MonoBehaviour
 
             FinishAttack("Player 2 used " + word.word + " | Damage: " + word.damage);
         }
+    }
+
+    private void PlayComboHitSFX()
+    {
+        if (AudioManager.Instance == null)
+            return;
+
+        if (useRandomPitchForComboHitSFX)
+        {
+            AudioManager.Instance.PlaySFXRandomPitch(
+                comboHitSFXIndex,
+                comboHitMinPitch,
+                comboHitMaxPitch
+                );
+        }
+        else
+        {
+            AudioManager.Instance.PlaySFX(comboHitSFXIndex);
+        }
+
     }
 
     private void FinishAttack(string msg)
