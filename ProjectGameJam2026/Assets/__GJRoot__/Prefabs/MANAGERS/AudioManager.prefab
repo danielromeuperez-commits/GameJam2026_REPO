@@ -49,4 +49,11 @@ MonoBehaviour:
   musicLibrary:
   - {fileID: 8300000, guid: 605baa2ff7785cd42bea495efc08e859, type: 3}
   - {fileID: 8300000, guid: 5caaf5fc5f4fe364fb6b6e3e14a1ffa3, type: 3}
-  sfxLibrary: []
+  sfxLibrary:
+  - {fileID: 8300000, guid: 37d4a3757466cc34b9a5e51f4d5df926, type: 3}
+  - {fileID: 8300000, guid: 0d2778e2b7a1ce14bb7d63a9aaecd8a0, type: 3}
+  - {fileID: 8300000, guid: ec7205840bb00ea45aea37c4238f5790, type: 3}
+  - {fileID: 8300000, guid: 111de391c8e419d40a2313df2bd0722b, type: 3}
+  - {fileID: 8300000, guid: a7950769bfd172d4d87067e67aa36184, type: 3}
+  - {fileID: 8300000, guid: 52dcc77ada3bce446a4b5451046ce7a4, type: 3}
+  - {fileID: 8300000, guid: 48e47a58e7f83b74c93634c06c7a988e, type: 3}
