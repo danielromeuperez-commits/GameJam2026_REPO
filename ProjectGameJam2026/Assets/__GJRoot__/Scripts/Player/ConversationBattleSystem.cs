@@ -508,7 +508,7 @@ public class ConversationBattleSystem : MonoBehaviour
 
         if (!attackSystem.attackPerformed && attackCountdownText != null)
         {
-            attackCountdownText.text = "ATTACK: 0";
+            attackCountdownText.text = "0";
             yield return new WaitForSeconds(0.3f);
         }
 

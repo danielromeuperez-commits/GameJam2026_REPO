@@ -9,7 +9,7 @@ public class AttackTimeModifier : MonoBehaviour
 
     [Header("Warning UI")]
     public CanvasGroup warningCanvas;   // Canvas con alpha control
-    public float flashDuration = 0.2f;
+    public float flashDuration = 0.5f;
     public int flashCount = 3;
 
     private float resultTime = 5f;
