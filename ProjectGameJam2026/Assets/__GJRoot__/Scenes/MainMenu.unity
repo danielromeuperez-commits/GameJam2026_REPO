@@ -2313,7 +2313,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -7444,7 +7444,7 @@ PrefabInstance:
       objectReference: {fileID: 419131336}
     - target: {fileID: 790670897720591295, guid: 8ce554edbc4a77d4cab367632a74ced4, type: 3}
       propertyPath: sfxLibrary.Array.size
-      value: 9
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 790670897720591295, guid: 8ce554edbc4a77d4cab367632a74ced4, type: 3}
       propertyPath: 'sfxLibrary.Array.data[7]'
@@ -7454,6 +7454,10 @@ PrefabInstance:
       propertyPath: 'sfxLibrary.Array.data[8]'
       value: 
       objectReference: {fileID: 8300000, guid: e83d4b363ef29d048b5b28d08e0401b2, type: 3}
+    - target: {fileID: 790670897720591295, guid: 8ce554edbc4a77d4cab367632a74ced4, type: 3}
+      propertyPath: 'sfxLibrary.Array.data[9]'
+      value: 
+      objectReference: {fileID: 8300000, guid: f8edc8b790da3ff43af79026f8c068f6, type: 3}
     - target: {fileID: 2835432904121849601, guid: 8ce554edbc4a77d4cab367632a74ced4, type: 3}
       propertyPath: m_Name
       value: AudioManager

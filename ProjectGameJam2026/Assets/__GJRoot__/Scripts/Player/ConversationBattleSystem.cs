@@ -2,6 +2,7 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class ConversationBattleSystem : MonoBehaviour
 {
@@ -49,6 +50,13 @@ public class ConversationBattleSystem : MonoBehaviour
 
     [Header("Attack Time")]
     public float attackTime = 5f;
+
+    [Header("Winner Flash")]
+    public CanvasGroup player1WinnerCanvas;
+    public CanvasGroup player2WinnerCanvas;
+
+    public float winnerFlashDuration = 0.5f;
+    public int winnerFlashCount = 3;
 
     [Header("UI")]
     public TMP_Text conversationCountdownText;
@@ -458,6 +466,17 @@ public class ConversationBattleSystem : MonoBehaviour
 
         SetCounterAttackText(winner);
 
+        if (winner == 1)
+        {
+            yield return StartCoroutine(FlashWinner(player1WinnerCanvas));
+        }
+        else if (winner == 2)
+        {
+            yield return StartCoroutine(FlashWinner(player2WinnerCanvas));
+        }
+
+        attackSystem.PrepareAttackWords();
+
         attackSystem.PrepareAttackWords();
 
         float timer = attackTime;
@@ -645,5 +664,27 @@ public class ConversationBattleSystem : MonoBehaviour
             return "Player 2 Wins";
 
         return "Draw";
+    }
+    private IEnumerator FlashWinner(CanvasGroup canvas)
+    {
+        if (canvas == null)
+            yield break;
+
+        for (int i = 0; i < winnerFlashCount; i++)
+        {
+            SetWinnerAlpha(canvas, 1f);
+            yield return new WaitForSeconds(winnerFlashDuration);
+
+            SetWinnerAlpha(canvas, 0f);
+            yield return new WaitForSeconds(winnerFlashDuration);
+        }
+
+        SetWinnerAlpha(canvas, 0f);
+    }
+
+    private void SetWinnerAlpha(CanvasGroup canvas, float alpha)
+    {
+        canvas.alpha = alpha;
+        canvas.gameObject.SetActive(alpha > 0f);
     }
 }
