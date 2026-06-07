@@ -3193,7 +3193,7 @@ RectTransform:
   m_GameObject: {fileID: 438736973}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.83207, y: 0.83207, z: 0.83207}
+  m_LocalScale: {x: 0.25113538, y: 0.25113538, z: 0.25113538}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1958573826}
@@ -3203,7 +3203,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 7, y: -4}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &438736975
@@ -4402,6 +4402,7 @@ GameObject:
   - component: {fileID: 576442651}
   - component: {fileID: 576442650}
   - component: {fileID: 576442653}
+  - component: {fileID: 576442654}
   m_Layer: 5
   m_Name: Button_MuyBueno
   m_TagString: Untagged
@@ -4547,6 +4548,28 @@ MonoBehaviour:
   overshootScale: 1.05
   normalScale: 1
   disappearScale: 0.9
+--- !u!114 &576442654
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 576442648}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff54210e99569884c9b26db3bbfdf8dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonChoiceFeedback
+  target: {fileID: 0}
+  backgroundImage: {fileID: 0}
+  canvasGroup: {fileID: 0}
+  selectedScale: 1.12
+  punchScale: 1.22
+  animationDuration: 0.18
+  dimmedAlpha: 0.45
+  changeColor: 1
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  selectedColor: {r: 1, g: 0.9, b: 0.25, a: 1}
 --- !u!1 &610382125
 GameObject:
   m_ObjectHideFlags: 0
@@ -4573,7 +4596,7 @@ RectTransform:
   m_GameObject: {fileID: 610382125}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.83207, y: 0.83207, z: 0.83207}
+  m_LocalScale: {x: 0.25113538, y: 0.25113538, z: 0.25113538}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 615379817}
@@ -4583,7 +4606,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 7, y: -4}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &610382127
@@ -6500,6 +6523,7 @@ GameObject:
   - component: {fileID: 979723764}
   - component: {fileID: 979723763}
   - component: {fileID: 979723766}
+  - component: {fileID: 979723767}
   m_Layer: 5
   m_Name: Button_MuyBueno
   m_TagString: Untagged
@@ -6645,6 +6669,28 @@ MonoBehaviour:
   overshootScale: 1.05
   normalScale: 1
   disappearScale: 0.9
+--- !u!114 &979723767
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 979723761}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff54210e99569884c9b26db3bbfdf8dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonChoiceFeedback
+  target: {fileID: 0}
+  backgroundImage: {fileID: 0}
+  canvasGroup: {fileID: 0}
+  selectedScale: 1.12
+  punchScale: 1.22
+  animationDuration: 0.18
+  dimmedAlpha: 0.45
+  changeColor: 1
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  selectedColor: {r: 1, g: 0.9, b: 0.25, a: 1}
 --- !u!1 &986491543 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7559393540367484102, guid: c76f2f0f48bdf9741b1e9cc554ed60fa, type: 3}
@@ -7171,6 +7217,7 @@ GameObject:
   - component: {fileID: 1025195390}
   - component: {fileID: 1025195389}
   - component: {fileID: 1025195392}
+  - component: {fileID: 1025195393}
   m_Layer: 5
   m_Name: Button_Meh
   m_TagString: Untagged
@@ -7316,6 +7363,28 @@ MonoBehaviour:
   overshootScale: 1.05
   normalScale: 1
   disappearScale: 0.9
+--- !u!114 &1025195393
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1025195387}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff54210e99569884c9b26db3bbfdf8dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonChoiceFeedback
+  target: {fileID: 0}
+  backgroundImage: {fileID: 0}
+  canvasGroup: {fileID: 0}
+  selectedScale: 1.12
+  punchScale: 1.22
+  animationDuration: 0.18
+  dimmedAlpha: 0.45
+  changeColor: 1
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  selectedColor: {r: 1, g: 0.9, b: 0.25, a: 1}
 --- !u!1 &1073266361
 GameObject:
   m_ObjectHideFlags: 0
@@ -8850,6 +8919,7 @@ GameObject:
   - component: {fileID: 1249722086}
   - component: {fileID: 1249722085}
   - component: {fileID: 1249722088}
+  - component: {fileID: 1249722089}
   m_Layer: 5
   m_Name: Button_Bueno
   m_TagString: Untagged
@@ -8995,6 +9065,28 @@ MonoBehaviour:
   overshootScale: 1.05
   normalScale: 1
   disappearScale: 0.9
+--- !u!114 &1249722089
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1249722083}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff54210e99569884c9b26db3bbfdf8dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonChoiceFeedback
+  target: {fileID: 0}
+  backgroundImage: {fileID: 0}
+  canvasGroup: {fileID: 0}
+  selectedScale: 1.12
+  punchScale: 1.22
+  animationDuration: 0.18
+  dimmedAlpha: 0.45
+  changeColor: 1
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  selectedColor: {r: 1, g: 0.9, b: 0.25, a: 1}
 --- !u!1 &1291764573
 GameObject:
   m_ObjectHideFlags: 0
@@ -9189,9 +9281,8 @@ MonoBehaviour:
   player2StatusText: {fileID: 0}
   resultText: {fileID: 0}
   counterAttackText: {fileID: 1940827369}
-  player1CounterAttackMessage: "\xA1\xA1 KEVEDO est\xE1 preparando un contraataque
-    !!"
-  player2CounterAttackMessage: "\xA1\xA1 GONGORRA est\xE1 preparando un contraataque
+  player1CounterAttackMessage: "\xA1\xA1 KEVEDO esta preparando un contraataque !!"
+  player2CounterAttackMessage: "\xA1\xA1 GONGORRA esta preparando un contraataque
     !!"
   player1UIButtons: {fileID: 2039543119}
   player2UIButtons: {fileID: 1634530338}
@@ -10076,6 +10167,7 @@ GameObject:
   - component: {fileID: 1406163997}
   - component: {fileID: 1406163996}
   - component: {fileID: 1406163999}
+  - component: {fileID: 1406164000}
   m_Layer: 5
   m_Name: Button_Bueno
   m_TagString: Untagged
@@ -10221,6 +10313,28 @@ MonoBehaviour:
   overshootScale: 1.05
   normalScale: 1
   disappearScale: 0.9
+--- !u!114 &1406164000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1406163994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff54210e99569884c9b26db3bbfdf8dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonChoiceFeedback
+  target: {fileID: 0}
+  backgroundImage: {fileID: 0}
+  canvasGroup: {fileID: 0}
+  selectedScale: 1.12
+  punchScale: 1.22
+  animationDuration: 0.18
+  dimmedAlpha: 0.45
+  changeColor: 1
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  selectedColor: {r: 1, g: 0.9, b: 0.25, a: 1}
 --- !u!1 &1420585034
 GameObject:
   m_ObjectHideFlags: 0
@@ -11490,26 +11604,29 @@ MonoBehaviour:
   textScreen1: {fileID: 1093986134}
   textScreen2: {fileID: 2133599992}
   textScreen3: {fileID: 1485398005}
+  button1Feedback: {fileID: 1025195393}
+  button2Feedback: {fileID: 1406164000}
+  button3Feedback: {fileID: 576442654}
   questionText: {fileID: 1565222332}
   conversationSets:
-  - pregunta: "Vas de genio sat\xEDrico, de lengua afilada\u2026"
+  - pregunta: "Vas de genio satirico, de lengua afilada\u2026"
     fraseMeh: ...pero tu rima parece sopa recalentada.
     fraseGood: ...pero no das risa, das pena rimada.
-    fraseVeryGood: "\u2026y eres solo un troll con m\xE9trica forzada."
-  - pregunta: "Metes tantos conceptos en una oraci\xF3n\u2026"
-    fraseMeh: "\u2026que hasta mi perro pide una explicaci\xF3n."
-    fraseGood: "\u2026que tu versos necesitan descompresi\xF3n."
-    fraseVeryGood: "\u2026que lo tuyo no es poes\xEDa es mansplaining, campe\xF3n."
+    fraseVeryGood: "\u2026y eres solo un troll con metrica forzada."
+  - pregunta: "Metes tantos conceptos en una oracion\u2026"
+    fraseMeh: "\u2026que hasta mi perro pide una explicacion."
+    fraseGood: "\u2026que tu versos necesitan descompresion."
+    fraseVeryGood: "\u2026que lo tuyo no es poesia es mansplaining, campeon."
   - pregunta: "Te flipan los culos, la caca y todo lo cochino\u2026"
-    fraseMeh: "\u2026Deja las letras y c\xF3mete un pepino."
+    fraseMeh: "\u2026Deja las letras y comete un pepino."
     fraseGood: ...Tus rimas no se leen, se limpian con papel fino.
-    fraseVeryGood: "\u2026Tu inspiraci\xF3n d\xF3nde la encontraste, \xBFen el retrete
+    fraseVeryGood: "\u2026Tu inspiracion donde la encontraste, \xBFen el retrete
       del vecino?"
-  - pregunta: "Dices que me odias, pero de m\xED estas pendiente\u2026"
-    fraseMeh: "...me sigues m\xE1s que un pato en una fuente."
+  - pregunta: "Dices que me odias, pero de mi estas pendiente\u2026"
+    fraseMeh: ...me sigues mas que un pato en una fuente.
     fraseGood: "\u2026tu rabia me hace grande entre la gente."
-    fraseVeryGood: "\u2026no eres mi rival, Kevedo: eres mi follower m\xE1s insistente."
-  - pregunta: "Adem\xE1s de sin talento, naciste con cojera\u2026"
+    fraseVeryGood: "\u2026no eres mi rival, Kevedo: eres mi follower mas insistente."
+  - pregunta: "Ademas de sin talento, naciste con cojera\u2026"
     fraseMeh: "\u2026y te caiste solo bajando la escalera."
     fraseGood: "\u2026tu paso va torcido y tu rima desespera."
     fraseVeryGood: "\u2026tu ego va corriendo, tu talento ni acelera."
@@ -11519,10 +11636,10 @@ MonoBehaviour:
     fraseVeryGood: "\u2026aunque leerte, colega, es la peor de las condenas."
   - pregunta: "Dicen que tu matrimonio dur\xF3 un suspiro\u2026"
     fraseMeh: "\u2026menos que con una cita mala con un vampiro."
-    fraseGood: "\u2026el cura al verte entrar pidi\xF3 su retiro."
-    fraseVeryGood: "\u2026normal, en First Dates te dir\xEDan \"no\" antes del aperitivo."
+    fraseGood: "\u2026el cura al verte entrar pidio su retiro."
+    fraseVeryGood: "\u2026normal, en First Dates te dirian \"no\" antes del aperitivo."
   - pregunta: "Te van los salseos y las conspiraciones\u2026"
-    fraseMeh: "\u2026y te l\xEDas como un pulpo at\xE1ndose los cordones."
+    fraseMeh: "\u2026y te lias como un pulpo atandose los cordones."
     fraseGood: ...y la corte te hizo mute por exceso de opiniones.
     fraseVeryGood: "\u2026Bro, tu no eres poeta y eres admin de marrones."
 --- !u!4 &1634530339
@@ -11601,7 +11718,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.CanvasScaler
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 800, y: 600}
@@ -11982,6 +12099,7 @@ GameObject:
   - component: {fileID: 1651000096}
   - component: {fileID: 1651000095}
   - component: {fileID: 1651000098}
+  - component: {fileID: 1651000099}
   m_Layer: 5
   m_Name: Button_Meh
   m_TagString: Untagged
@@ -12127,6 +12245,28 @@ MonoBehaviour:
   overshootScale: 1.05
   normalScale: 1
   disappearScale: 0.9
+--- !u!114 &1651000099
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1651000093}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff54210e99569884c9b26db3bbfdf8dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonChoiceFeedback
+  target: {fileID: 0}
+  backgroundImage: {fileID: 0}
+  canvasGroup: {fileID: 0}
+  selectedScale: 1.12
+  punchScale: 1.22
+  animationDuration: 0.18
+  dimmedAlpha: 0.45
+  changeColor: 1
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  selectedColor: {r: 1, g: 0.9, b: 0.25, a: 1}
 --- !u!1 &1661140550
 GameObject:
   m_ObjectHideFlags: 0
@@ -12492,7 +12632,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.CanvasScaler
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 800, y: 600}
@@ -15488,32 +15628,35 @@ MonoBehaviour:
   textScreen1: {fileID: 1932786281}
   textScreen2: {fileID: 1609315785}
   textScreen3: {fileID: 1012970227}
+  button1Feedback: {fileID: 1651000099}
+  button2Feedback: {fileID: 1249722089}
+  button3Feedback: {fileID: 979723767}
   questionText: {fileID: 559472886}
   conversationSets:
   - pregunta: "Vas de poeta culto, de literato fino\u2026"
     fraseMeh: "\u2026y escribes tan raro que pareces un pepino."
-    fraseGood: "\u2026y para decir \u201Cagua\u201D escribes \u201Cl\xEDquido cristalino\u201D"
+    fraseGood: "\u2026y para decir \u201Cagua\u201D escribes \u201Cliquido cristalino\u201D"
     fraseVeryGood: ...pero tu flow se atraganta como pan con tocino.
-  - pregunta: "\xC9rase un hombre a una nariz pegado\u2026"
-    fraseMeh: "\u2026que ol\xEDa los chorizos de cualquier lado."
-    fraseGood: "\u2026que entraba antes la nariz y despu\xE9s el poeta desdichado."
-    fraseVeryGood: "\u2026que para un selfie ten\xEDas el modo panor\xE1mico activado"
-  - pregunta: "Te flipa el hip\xE9rbaton, las palabras al rev\xE9s\u2026"
+  - pregunta: "Erase un hombre a una nariz pegado\u2026"
+    fraseMeh: "\u2026que olia los chorizos de cualquier lado."
+    fraseGood: "\u2026que entraba antes la nariz y despues el poeta desdichado."
+    fraseVeryGood: "\u2026que para un selfie tenias el modo panoramico activado"
+  - pregunta: "Te flipa el hiperbaton, las palabras al reves\u2026"
     fraseMeh: "\u2026y haces que al leerte me huelan los pies."
-    fraseGood: "\u2026y haces que al leerte cualquiera pierda el inter\xE9s."
-    fraseVeryGood: "\u2026 tu frases tiene m\xE1s bugs que un juego en early access"
-  - pregunta: "Tu libro Soledades qued\xF3 inacabado\u2026"
+    fraseGood: "\u2026y haces que al leerte cualquiera pierda el interes."
+    fraseVeryGood: "\u2026 tu frases tiene mas bugs que un juego en early access"
+  - pregunta: "Tu libro Soledades quedo inacabado\u2026"
     fraseMeh: "\u2026como un bocata mordido y abandonado."
     fraseGood: "\u2026prometiste mucho contenido y te quedaste bloqueado."
     fraseVeryGood: "\u2026fuiste el primero en hacer ghosting rimado."
   - pregunta: "Bro, eres famoso porque te hice casito\u2026"
-    fraseMeh: "\u2026sino tan solo ser\xEDas polvo en un librito."
+    fraseMeh: "\u2026sino tan solo serias polvo en un librito."
     fraseGood: "\u2026te puse en el mapa con un solo versito."
     fraseVeryGood: ...tu fama vive de mi hate, Luisito.
-  - pregunta: "Te quedaste mu\xF1eco de una apoplej\xEDa\u2026"
-    fraseMeh: "\u2026ni t\xFA sobreviviste a tu propia poes\xEDa."
-    fraseGood: "\u2026de tanto verso raro se te fue la bater\xEDa."
-    fraseVeryGood: "\u2026\xBFte da pena? Pues a llorar a la llorer\xEDa."
+  - pregunta: "Te quedaste mu\xF1eco de una apoplejia\u2026"
+    fraseMeh: "\u2026ni t\xFA sobreviviste a tu propia poesia."
+    fraseGood: "\u2026de tanto verso raro se te fue la bateria."
+    fraseVeryGood: "\u2026\xBFte da pena? Pues a llorar a la lloreria."
   - pregunta: "Vas de sacerdote, de poeta celestial\u2026"
     fraseMeh: "\u2026pero rimas peor que un pato en un portal."
     fraseGood: "\u2026pero lo tuyo no es divino es pecado gramatical."

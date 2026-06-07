@@ -9,6 +9,11 @@ public class DialogueShuffle : MonoBehaviour
     public TextMeshProUGUI textScreen2;
     public TextMeshProUGUI textScreen3;
 
+    [Header("Button Feedback")]
+    public UIButtonChoiceFeedback button1Feedback;
+    public UIButtonChoiceFeedback button2Feedback;
+    public UIButtonChoiceFeedback button3Feedback;
+
     [Header("Question")]
     public TextMeshProUGUI questionText;
 
@@ -50,6 +55,8 @@ public class DialogueShuffle : MonoBehaviour
         SetButtonText(textScreen1, elMapeoReal[0]);
         SetButtonText(textScreen2, elMapeoReal[1]);
         SetButtonText(textScreen3, elMapeoReal[2]);
+
+        ResetButtonFeedbacks();
     }
 
     private void SeleccionarNuevoConjunto()
@@ -96,6 +103,53 @@ public class DialogueShuffle : MonoBehaviour
             default:
                 textUI.text = "ERROR";
                 break;
+        }
+    }
+
+    public void PlaySelectedFeedback(int buttonIndex)
+    {
+        UIButtonChoiceFeedback selectedButton = GetFeedbackByIndex(buttonIndex);
+
+        for (int i = 0; i < 3; i++)
+        {
+            UIButtonChoiceFeedback feedback = GetFeedbackByIndex(i);
+
+            if (feedback == null)
+                continue;
+
+            if (feedback == selectedButton)
+                feedback.PlaySelected();
+            else
+                feedback.SetDimmed();
+        }
+    }
+
+    public void ResetButtonFeedbacks()
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            UIButtonChoiceFeedback feedback = GetFeedbackByIndex(i);
+
+            if (feedback != null)
+                feedback.SetNormal();
+        }
+    }
+
+    private UIButtonChoiceFeedback GetFeedbackByIndex(int index)
+    {
+        switch (index)
+        {
+            case 0:
+                return button1Feedback;
+
+            case 1:
+                return button2Feedback;
+
+            case 2:
+                return button3Feedback;
+
+            default:
+                return null;
         }
     }
 }

@@ -223,11 +223,11 @@ public class ConversationBattleSystem : MonoBehaviour
         if (kb == null) return;
 
         if (kb.digit1Key.wasPressedThisFrame)
-            LockPlayer1Choice(player1Mapping[0]);
+            LockPlayer1Choice(player1Mapping[0], 0);
         else if (kb.digit2Key.wasPressedThisFrame)
-            LockPlayer1Choice(player1Mapping[1]);
+            LockPlayer1Choice(player1Mapping[1], 1);
         else if (kb.digit3Key.wasPressedThisFrame)
-            LockPlayer1Choice(player1Mapping[2]);
+            LockPlayer1Choice(player1Mapping[2], 2);
     }
 
     private void ReadPlayer2Input()
@@ -239,11 +239,11 @@ public class ConversationBattleSystem : MonoBehaviour
         if (kb == null) return;
 
         if (kb.digit7Key.wasPressedThisFrame || kb.numpad7Key.wasPressedThisFrame)
-            LockPlayer2Choice(player2Mapping[0]);
+            LockPlayer2Choice(player2Mapping[0], 0);
         else if (kb.digit8Key.wasPressedThisFrame || kb.numpad8Key.wasPressedThisFrame)
-            LockPlayer2Choice(player2Mapping[1]);
+            LockPlayer2Choice(player2Mapping[1], 1);
         else if (kb.digit9Key.wasPressedThisFrame || kb.numpad9Key.wasPressedThisFrame)
-            LockPlayer2Choice(player2Mapping[2]);
+            LockPlayer2Choice(player2Mapping[2], 2);
     }
 
     private void PlayAnswerSelectedSFX()
@@ -257,11 +257,14 @@ public class ConversationBattleSystem : MonoBehaviour
             AudioManager.Instance.PlaySFX(answerSelectedSFXIndex);
     }
 
-    private void LockPlayer1Choice(ConversationType choice)
+    private void LockPlayer1Choice(ConversationType choice, int buttonIndex)
     {
         player1Choice = choice;
 
         PlayAnswerSelectedSFX();
+
+        if (player1UIButtons != null)
+            player1UIButtons.PlaySelectedFeedback(buttonIndex);
 
         if (player1StatusText != null)
             player1StatusText.text = "Player 1 locked in its answer";
@@ -269,11 +272,14 @@ public class ConversationBattleSystem : MonoBehaviour
         Debug.Log("Player 1 chose: " + choice);
     }
 
-    private void LockPlayer2Choice(ConversationType choice)
+    private void LockPlayer2Choice(ConversationType choice, int buttonIndex)
     {
         player2Choice = choice;
 
         PlayAnswerSelectedSFX();
+
+        if (player2UIButtons != null)
+            player2UIButtons.PlaySelectedFeedback(buttonIndex);
 
         if (player2StatusText != null)
             player2StatusText.text = "Player 2 locked in its answer";
