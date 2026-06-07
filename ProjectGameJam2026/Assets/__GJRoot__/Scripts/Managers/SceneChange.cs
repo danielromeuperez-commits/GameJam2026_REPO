@@ -15,7 +15,7 @@ public class SceneChange : MonoBehaviour
 
 private IEnumerator changeWhenTime()
     {
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(3.5f);
         SceneManager.LoadScene(nombrEscena);
     }
 }
